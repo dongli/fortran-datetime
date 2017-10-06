@@ -14,19 +14,72 @@ module timedelta_mod
 
 contains
 
-  elemental type(timedelta_type) function timedelta(days, hours, minutes, seconds, milliseconds)
+  type(timedelta_type) function timedelta(days, hours, minutes, seconds, milliseconds) result(res)
 
-    integer, intent(in), optional :: days
-    integer, intent(in), optional :: hours
-    integer, intent(in), optional :: minutes
-    integer, intent(in), optional :: seconds
+    class(*), intent(in), optional :: days
+    class(*), intent(in), optional :: hours
+    class(*), intent(in), optional :: minutes
+    class(*), intent(in), optional :: seconds
     integer, intent(in), optional :: milliseconds
 
-    if (present(days)) timedelta%days = days
-    if (present(hours)) timedelta%hours = hours
-    if (present(minutes)) timedelta%minutes = minutes
-    if (present(seconds)) timedelta%seconds = seconds
-    if (present(milliseconds)) timedelta%milliseconds = milliseconds
+    real(8) remainder
+
+    remainder = 0.0d0
+
+    if (present(days)) then
+      select type (days)
+      type is (integer)
+        res%days = days
+      type is (real(8))
+        res%days = floor(days)
+        remainder = days - res%days
+      end select
+    end if
+
+    if (present(hours)) then
+      select type (hours)
+      type is (integer)
+        res%hours = hours
+      type is (real(8))
+        res%hours = floor(hours + remainder * 24)
+        remainder = hours + remainder * 24 - res%hours
+      end select
+    else
+      res%hours = floor(remainder * 24)
+      remainder = remainder * 24 - res%hours
+    end if
+
+    if (present(minutes)) then
+      select type (minutes)
+      type is (integer)
+        res%minutes = minutes
+      type is (real(8))
+        res%minutes = floor(minutes + remainder * 60)
+        remainder = minutes + remainder * 60 - res%minutes
+      end select
+    else
+      res%minutes = floor(remainder * 60)
+      remainder = remainder * 60 - res%minutes
+    end if
+
+    if (present(seconds)) then
+      select type (seconds)
+      type is (integer)
+        res%seconds = seconds
+      type is (real(8))
+        res%seconds = floor(seconds + remainder * 60)
+        remainder = seconds + remainder * 60 - res%seconds
+      end select
+    else
+      res%seconds = floor(remainder * 60)
+      remainder = remainder * 60 - res%seconds
+    end if
+
+    if (present(milliseconds)) then
+      res%milliseconds = milliseconds + remainder * 1000
+    else
+      res%milliseconds = remainder * 1000
+    end if
 
   end function timedelta
 
