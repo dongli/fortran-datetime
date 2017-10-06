@@ -28,8 +28,10 @@ target_link_libraries (datetime_test fortran_unit_test fortran_datetime)
 install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  PUBLIC_HEADER DESTINATION include
 )
+
+file (GLOB mods "${CMAKE_BINARY_DIR}/*.mod")
+install (FILES ${mods} DESTINATION include/fortran_datetime)
 
 include (CMakePackageConfigHelpers)
 write_basic_package_version_file (
@@ -40,22 +42,19 @@ write_basic_package_version_file (
 
 export (EXPORT FortranDatetimeTargets
   FILE "${CMAKE_CURRENT_BINARY_DIR}/FortranDatetime/FortranDatetimeTargets.cmake"
-  NAMESPACE FortranDatetime::
 )
 configure_file (cmake/FortranDatetimeConfig.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/FortranDatetime/FortranDatetimeConfig.cmake"
-  COPYONLY
 )
 
 set (ConfigPackageLocation lib/cmake/FortranDatetime)
 install (EXPORT FortranDatetimeTargets
   FILE FortranDatetimeTargets.cmake
-  NAMESPACE FortranDatetime::
   DESTINATION ${ConfigPackageLocation}
 )
 install (
   FILES
-    cmake/FortranDatetimeConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/FortranDatetime/FortranDatetimeConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/FortranDatetime/FortranDatetimeConfigVersion.cmake"
   DESTINATION
     ${ConfigPackageLocation}
