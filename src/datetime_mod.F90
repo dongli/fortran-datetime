@@ -32,9 +32,19 @@ module datetime_mod
     procedure, private :: assign
     procedure, private :: add
     procedure, private :: eq
+    procedure, private :: neq
+    procedure, private :: gt
+    procedure, private :: ge
+    procedure, private :: lt
+    procedure, private :: le
     generic :: assignment(=) => assign
     generic :: operator(+) => add
     generic :: operator(==) => eq
+    generic :: operator(/=) => neq
+    generic :: operator(>) => gt
+    generic :: operator(>=) => ge
+    generic :: operator(<) => lt
+    generic :: operator(<=) => le
   end type datetime_type
 
 contains
@@ -225,7 +235,7 @@ contains
 
   end function add
 
-  elemental logical function eq(this, other)
+  pure elemental logical function eq(this, other)
 
     class(datetime_type), intent(in) :: this
     class(datetime_type), intent(in) :: other
@@ -239,6 +249,57 @@ contains
          this%millisecond == other%millisecond
 
   end function eq
+
+  pure elemental logical function neq(this, other)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    neq = .not. this == other
+
+  end function neq
+
+  pure elemental logical function gt(this, other)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    gt = this%year        > other%year    .or. &
+         this%month       > other%month   .or. &
+         this%day         > other%day     .or. &
+         this%hour        > other%hour    .or. &
+         this%minute      > other%minute  .or. &
+         this%second      > other%second  .or. &
+         this%millisecond > other%millisecond
+
+  end function gt
+
+  pure elemental logical function ge(this, other)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    ge = this > other .or. this == other
+
+  end function ge
+
+  pure elemental logical function lt(this, other)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    lt = other > this
+
+  end function lt
+
+  pure elemental logical function le(this, other)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    le = other > this .or. this == other
+
+  end function le
 
   pure integer function days_of_month(year, month) result(res)
 
