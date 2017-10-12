@@ -31,6 +31,7 @@ module datetime_mod
     procedure :: add_milliseconds
     procedure, private :: assign
     procedure, private :: add
+    procedure, private :: sub
     procedure, private :: eq
     procedure, private :: neq
     procedure, private :: gt
@@ -39,6 +40,7 @@ module datetime_mod
     procedure, private :: le
     generic :: assignment(=) => assign
     generic :: operator(+) => add
+    generic :: operator(-) => sub
     generic :: operator(==) => eq
     generic :: operator(/=) => neq
     generic :: operator(>) => gt
@@ -234,6 +236,20 @@ contains
     call res%add_days(td%days)
 
   end function add
+
+  elemental type(datetime_type) function  sub(this, td) result(res)
+
+    class(datetime_type), intent(in) :: this
+    class(timedelta_type), intent(in) :: td
+
+    res = this
+    call res%add_milliseconds(-td%milliseconds)
+    call res%add_seconds(-td%seconds)
+    call res%add_minutes(-td%minutes)
+    call res%add_hours(-td%hours)
+    call res%add_days(-td%days)
+
+  end function sub
 
   pure elemental logical function eq(this, other)
 
