@@ -40,6 +40,10 @@ program datetime_test
   call assert_true(a /= b)
   call assert_equal(a%minute + 5, b%minute)
 
+  a = datetime(minute=6)
+  b = datetime(hour=1)
+  call assert_false(a > b)
+
   a = datetime(minute=56)
 
   b = a + dt

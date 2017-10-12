@@ -264,13 +264,42 @@ contains
     class(datetime_type), intent(in) :: this
     class(datetime_type), intent(in) :: other
 
-    gt = this%year        > other%year    .or. &
-         this%month       > other%month   .or. &
-         this%day         > other%day     .or. &
-         this%hour        > other%hour    .or. &
-         this%minute      > other%minute  .or. &
-         this%second      > other%second  .or. &
-         this%millisecond > other%millisecond
+    if (this%year < other%year) then
+      gt = .false.
+      return
+    end if
+
+    if (this%month < other%month) then
+      gt = .false.
+      return
+    end if
+
+    if (this%day < other%day) then
+      gt = .false.
+      return
+    end if
+
+    if (this%hour < other%hour) then
+      gt = .false.
+      return
+    end if
+
+    if (this%minute < other%minute) then
+      gt = .false.
+      return
+    end if
+
+    if (this%second < other%second) then
+      gt = .false.
+      return
+    end if
+
+    if (this%millisecond < other%millisecond) then
+      gt = .false.
+      return
+    end if
+
+    gt = this /= other
 
   end function gt
 
