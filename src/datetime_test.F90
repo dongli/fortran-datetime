@@ -69,6 +69,20 @@ program datetime_test
   call assert_equal(b%minute, 1)
   call assert_equal(b%second, 15)
 
+  dt = timedelta(seconds=21600)
+
+  a = datetime()
+
+  b = a - dt
+
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 31)
+  call assert_equal(b%hour, 18)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
+
   call assert_false(is_leap_year(2017))
   call assert_true(is_leap_year(2000))
   call assert_true(is_leap_year(2004))
@@ -78,9 +92,9 @@ program datetime_test
 
   a = datetime(days=120)
 
-  call assert_equal(a%year, 0)
-  call assert_equal(a%month, 4)
-  call assert_equal(a%day, 30)
+  call assert_equal(a%year, 1)
+  call assert_equal(a%month, 5)
+  call assert_equal(a%day, 1)
   call assert_equal(a%hour, 0)
   call assert_equal(a%minute, 0)
 

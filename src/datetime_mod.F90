@@ -13,7 +13,7 @@ module datetime_mod
   public is_leap_year
 
   type datetime_type
-    integer :: year = 0
+    integer :: year = 1
     integer :: month = 1
     integer :: day = 1
     integer :: hour = 0
@@ -105,7 +105,7 @@ contains
       this%month = mod(this%month, 12)
     else if (this%month < 1) then
       this%year = this%year - this%month / 12 - 1
-      this%month = mod(this%month, 12) + 1
+      this%month = 12 + mod(this%month, 12)
     end if
 
   end subroutine add_months
