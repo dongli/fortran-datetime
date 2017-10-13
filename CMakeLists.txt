@@ -8,8 +8,6 @@ set (version 0.0.1)
  
 set (CMAKE_Fortran_FLAGS "-ffree-line-length-none")
 
-find_package (FortranUnitTest)
-
 set (sources
   "${PROJECT_SOURCE_DIR}/src/timedelta_mod.F90"
   "${PROJECT_SOURCE_DIR}/src/datetime_mod.F90"
@@ -20,6 +18,8 @@ set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
 if (NOT CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+  find_package (FortranUnitTest)
+
   add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
   target_link_libraries (timedelta_test fortran_unit_test fortran_datetime)
 
