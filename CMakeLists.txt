@@ -19,11 +19,13 @@ add_library (fortran_datetime SHARED ${sources})
 set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
-add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
-target_link_libraries (timedelta_test fortran_unit_test fortran_datetime)
+if (NOT CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
+  target_link_libraries (timedelta_test fortran_unit_test fortran_datetime)
 
-add_executable (datetime_test "${PROJECT_SOURCE_DIR}/src/datetime_test.F90")
-target_link_libraries (datetime_test fortran_unit_test fortran_datetime)
+  add_executable (datetime_test "${PROJECT_SOURCE_DIR}/src/datetime_test.F90")
+  target_link_libraries (datetime_test fortran_unit_test fortran_datetime)
+endif ()
 
 install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
   ARCHIVE DESTINATION lib
