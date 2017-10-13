@@ -51,7 +51,10 @@ module datetime_mod
 
 contains
 
-  elemental type(datetime_type) function datetime(year, month, day, hour, minute, second, millisecond, timezone)
+  elemental type(datetime_type) function datetime( &
+      year,  month,  day,  hour,  minute, second, millisecond, &
+                     days, hours, minutes, &
+      timezone)
 
     integer, intent(in), optional :: year
     integer, intent(in), optional :: month
@@ -60,6 +63,9 @@ contains
     integer, intent(in), optional :: minute
     integer, intent(in), optional :: second
     integer, intent(in), optional :: millisecond
+    integer, intent(in), optional :: days
+    integer, intent(in), optional :: hours
+    integer, intent(in), optional :: minutes
     real(8), intent(in), optional :: timezone
 
     if (present(year))        datetime%year        = year
@@ -70,6 +76,10 @@ contains
     if (present(second))      datetime%second      = second
     if (present(millisecond)) datetime%millisecond = millisecond
     if (present(timezone))    datetime%timezone    = timezone
+    if (present(days))        call datetime%add_days(days)
+    if (present(hours))       call datetime%add_hours(hours)
+    if (present(minutes))     call datetime%add_minutes(minutes)
+    if (present(timezone))    datetime%timezone = timezone
 
   end function datetime
 
@@ -223,7 +233,7 @@ contains
 
   end subroutine assign
 
-  elemental type(datetime_type) function  add(this, td) result(res)
+  elemental type(datetime_type) function add(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
     class(timedelta_type), intent(in) :: td
@@ -237,7 +247,7 @@ contains
 
   end function add
 
-  elemental type(datetime_type) function  sub(this, td) result(res)
+  elemental type(datetime_type) function sub(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
     class(timedelta_type), intent(in) :: td

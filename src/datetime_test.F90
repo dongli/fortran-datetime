@@ -76,6 +76,14 @@ program datetime_test
   call assert_true(is_leap_year(2012))
   call assert_true(is_leap_year(2016))
 
+  a = datetime(days=120)
+
+  call assert_equal(a%year, 0)
+  call assert_equal(a%month, 4)
+  call assert_equal(a%day, 30)
+  call assert_equal(a%hour, 0)
+  call assert_equal(a%minute, 0)
+
   call test_case_report('Test datetime type')
 
   call test_case_final()
