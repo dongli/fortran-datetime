@@ -33,7 +33,10 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
 )
 
 file (GLOB mods "${CMAKE_BINARY_DIR}/*.mod")
-install (FILES ${mods} DESTINATION include/fortran_datetime)
+install (FILES ${mods}
+  CONFIGURATIONS Release
+  DESTINATION include/fortran_datetime
+)
 
 include (CMakePackageConfigHelpers)
 write_basic_package_version_file (
