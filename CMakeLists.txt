@@ -32,11 +32,15 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
   LIBRARY DESTINATION lib
 )
 
-file (GLOB mods "${CMAKE_BINARY_DIR}/*.mod")
-install (FILES ${mods}
-  CONFIGURATIONS Release
-  DESTINATION include/fortran_datetime
-)
+foreach (source IN LISTS sources)
+  if (source MATCHES "_mod.F90")
+    get_filename_component (filename ${source} NAME_WE)
+    install (FILES "${CMAKE_BINARY_DIR}/${filename}.mod"
+      CONFIGURATIONS Release
+      DESTINATION include/fortran_datetime
+    )
+  endif ()
+endforeach ()
 
 include (CMakePackageConfigHelpers)
 write_basic_package_version_file (
