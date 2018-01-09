@@ -104,7 +104,7 @@ contains
       this%year = this%year + this%month / 12
       this%month = mod(this%month, 12)
     else if (this%month < 1) then
-      this%year = this%year - this%month / 12 - 1
+      this%year = this%year + this%month / 12 - 1
       this%month = 12 + mod(this%month, 12)
     end if
 
@@ -120,16 +120,19 @@ contains
     this%day = this%day + days
 
     do
-      month_days = days_of_month(this%year, this%month)
-      if (this%day > month_days) then
-        call this%add_months(1)
-        this%day = this%day - month_days
-      else if (this%day < 1) then
+      if (this%day < 1) then
         call this%add_months(-1)
+        month_days = days_of_month(this%year, this%month)
         this%day = this%day + month_days
       else
-        exit
-      end if      
+        month_days = days_of_month(this%year, this%month)
+        if (this%day > month_days) then
+          call this%add_months(1)
+          this%day = this%day - month_days
+        else
+          exit
+        end if
+      end if
     end do
 
   end subroutine add_days
@@ -141,17 +144,13 @@ contains
 
     this%hour = this%hour + hours
 
-    do
-      if (this%hour >= 24) then
-        call this%add_days(this%hour / 24)
-        this%hour = mod(this%hour, 24)
-      else if (this%hour < 0) then
-        call this%add_days(this%hour / 24 - 1)
-        this%hour = mod(this%hour, 24) + 24
-      else
-        exit
-      end if
-    end do
+    if (this%hour >= 24) then
+      call this%add_days(this%hour / 24)
+      this%hour = mod(this%hour, 24)
+    else if (this%hour < 0) then
+      call this%add_days(this%hour / 24 - 1)
+      this%hour = mod(this%hour, 24) + 24
+    end if
 
   end subroutine add_hours
 
@@ -162,17 +161,13 @@ contains
 
     this%minute = this%minute + minutes
 
-    do
-      if (this%minute >= 60) then
-        call this%add_hours(this%minute / 60)
-        this%minute = mod(this%minute, 60)
-      else if (this%minute < 0) then
-        call this%add_hours(this%minute / 60 - 1)
-        this%minute = mod(this%minute, 60) + 60
-      else
-        exit
-      end if
-    end do
+    if (this%minute >= 60) then
+      call this%add_hours(this%minute / 60)
+      this%minute = mod(this%minute, 60)
+    else if (this%minute < 0) then
+      call this%add_hours(this%minute / 60 - 1)
+      this%minute = mod(this%minute, 60) + 60
+    end if
 
   end subroutine add_minutes
 
@@ -183,17 +178,13 @@ contains
 
     this%second = this%second + seconds
 
-    do
-      if (this%second >= 60) then
-        call this%add_minutes(this%second / 60)
-        this%second = mod(this%second, 60)
-      else if (this%second < 0) then
-        call this%add_minutes(this%second / 60 - 1)
-        this%second = mod(this%second, 60) + 60
-      else
-        exit
-      end if
-    end do
+    if (this%second >= 60) then
+      call this%add_minutes(this%second / 60)
+      this%second = mod(this%second, 60)
+    else if (this%second < 0) then
+      call this%add_minutes(this%second / 60 - 1)
+      this%second = mod(this%second, 60) + 60
+    end if
 
   end subroutine add_seconds
 
@@ -204,17 +195,13 @@ contains
 
     this%millisecond = this%millisecond + milliseconds
 
-    do
-      if (this%millisecond >= 1000) then
-        call this%add_seconds(this%millisecond / 1000)
-        this%millisecond = mod(this%millisecond, 1000)
-      else if (this%millisecond < 0) then
-        call this%add_seconds(this%millisecond / 1000 - 1)
-        this%millisecond = mod(this%millisecond, 1000) + 1000
-      else
-        exit
-      end if
-    end do
+    if (this%millisecond >= 1000) then
+      call this%add_seconds(this%millisecond / 1000)
+      this%millisecond = mod(this%millisecond, 1000)
+    else if (this%millisecond < 0) then
+      call this%add_seconds(this%millisecond / 1000 - 1)
+      this%millisecond = mod(this%millisecond, 1000) + 1000
+    end if
 
   end subroutine add_milliseconds
 
