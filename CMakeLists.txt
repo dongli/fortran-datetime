@@ -7,6 +7,7 @@ project (FortranDatetime Fortran)
 set (version 0.0.1)
  
 set (CMAKE_Fortran_FLAGS "-ffree-line-length-none")
+set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/fortran_datetime")
 
 set (sources
   "${PROJECT_SOURCE_DIR}/src/timedelta_mod.F90"
@@ -32,15 +33,7 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
   LIBRARY DESTINATION lib
 )
 
-foreach (source IN LISTS sources)
-  if (source MATCHES "_mod.F90")
-    get_filename_component (filename ${source} NAME_WE)
-    install (FILES "${CMAKE_BINARY_DIR}/${filename}.mod"
-      CONFIGURATIONS Release
-      DESTINATION include/fortran_datetime
-    )
-  endif ()
-endforeach ()
+install (DIRECTORY "${CMAKE_BINARY_DIR}/fortran_datetime" DESTINATION include)
 
 include (CMakePackageConfigHelpers)
 write_basic_package_version_file (

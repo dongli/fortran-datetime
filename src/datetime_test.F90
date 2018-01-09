@@ -13,8 +13,8 @@ program datetime_test
 
   call test_case_create('Test datetime type')
 
+  ! Test constructor function.
   a = datetime(2017, 10, 6, 12, 31, 23)
-
   call assert_equal(a%year, 2017)
   call assert_equal(a%month, 10)
   call assert_equal(a%day, 6)
@@ -25,14 +25,14 @@ program datetime_test
   call assert_approximate(a%timezone, 0.0d0)
   call assert_equal(a%isoformat(), '2017-10-06T12:31:23Z')
 
+  ! Test assignment and equal judgement.
   b = a
-
   call assert_true(a == b)
 
+  ! Test timedelta operators and judgements.
   dt = timedelta(minutes=5)
 
   b = a + dt
-
   call assert_true(b > a)
   call assert_true(b >= a)
   call assert_true(a < b)
@@ -41,7 +41,6 @@ program datetime_test
   call assert_equal(a%minute + 5, b%minute)
 
   b = a - dt
-
   call assert_true(b < a)
   call assert_true(b <= a)
   call assert_true(a > b)
@@ -49,6 +48,7 @@ program datetime_test
   call assert_true(a /= b)
   call assert_equal(a%minute - 5, b%minute)
 
+  ! Test construction from minute and hour.
   a = datetime(minute=6)
   b = datetime(hour=1)
   call assert_false(a > b)
@@ -56,25 +56,77 @@ program datetime_test
   a = datetime(minute=56)
 
   b = a + dt
-
   call assert_equal(b%hour, 1)
   call assert_equal(b%minute, 1)
 
   a = datetime(second=45)
-
   dt = timedelta(seconds=30)
-
   b = a + dt
-
   call assert_equal(b%minute, 1)
   call assert_equal(b%second, 15)
 
-  dt = timedelta(seconds=21600)
-
+  ! Test timedelta days.
+  dt = timedelta(days=31)
   a = datetime()
-
   b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 1)
+  call assert_equal(b%hour, 0)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
 
+  dt = timedelta(days=37)
+  a = datetime()
+  b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 11)
+  call assert_equal(b%day, 25)
+  call assert_equal(b%hour, 0)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
+
+  ! Test timedelta hours.
+  dt = timedelta(hours=25)
+  a = datetime()
+  b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 30)
+  call assert_equal(b%hour, 23)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
+
+  dt = timedelta(hours=24)
+  a = datetime()
+  b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 31)
+  call assert_equal(b%hour, 0)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
+
+  ! Test timedelta minutes.
+  dt = timedelta(minutes=60)
+  a = datetime()
+  b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 31)
+  call assert_equal(b%hour, 23)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 0)
+  call assert_equal(b%millisecond, 0)
+
+  ! Test timedelta seconds.
+  dt = timedelta(seconds=21600)
+  a = datetime()
+  b = a - dt
   call assert_equal(b%year, 0)
   call assert_equal(b%month, 12)
   call assert_equal(b%day, 31)
@@ -83,6 +135,30 @@ program datetime_test
   call assert_equal(b%second, 0)
   call assert_equal(b%millisecond, 0)
 
+  ! Test timedelta milliseconds.
+  dt = timedelta(milliseconds=2200)
+  a = datetime(millisecond=300)
+  b = a + dt
+  call assert_equal(b%year, 1)
+  call assert_equal(b%month, 1)
+  call assert_equal(b%day, 1)
+  call assert_equal(b%hour, 0)
+  call assert_equal(b%minute, 0)
+  call assert_equal(b%second, 2)
+  call assert_equal(b%millisecond, 500)
+
+  dt = timedelta(milliseconds=1000)
+  a = datetime()
+  b = a - dt
+  call assert_equal(b%year, 0)
+  call assert_equal(b%month, 12)
+  call assert_equal(b%day, 31)
+  call assert_equal(b%hour, 23)
+  call assert_equal(b%minute, 59)
+  call assert_equal(b%second, 59)
+  call assert_equal(b%millisecond, 0)
+
+  ! Test leap year judgement.
   call assert_false(is_leap_year(2017))
   call assert_true(is_leap_year(2000))
   call assert_true(is_leap_year(2004))
@@ -90,13 +166,20 @@ program datetime_test
   call assert_true(is_leap_year(2012))
   call assert_true(is_leap_year(2016))
 
+  ! Test construction from days.
   a = datetime(days=120)
-
   call assert_equal(a%year, 1)
   call assert_equal(a%month, 5)
   call assert_equal(a%day, 1)
   call assert_equal(a%hour, 0)
   call assert_equal(a%minute, 0)
+
+  ! Test add_* subroutines.
+  a = datetime(2017, 2, 1)
+  call a%add_months(-6)
+  call assert_equal(a%year, 2016)
+  call assert_equal(a%month, 8)
+  call assert_equal(a%day, 1)
 
   call test_case_report('Test datetime type')
 

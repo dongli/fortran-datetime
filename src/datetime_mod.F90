@@ -148,8 +148,13 @@ contains
       call this%add_days(this%hour / 24)
       this%hour = mod(this%hour, 24)
     else if (this%hour < 0) then
-      call this%add_days(this%hour / 24 - 1)
-      this%hour = mod(this%hour, 24) + 24
+      if (mod(this%hour, 24) == 0) then
+        call this%add_days(this%hour / 24)
+        this%hour = 0
+      else
+        call this%add_days(this%hour / 24 - 1)
+        this%hour = mod(this%hour, 24) + 24
+      end if
     end if
 
   end subroutine add_hours
@@ -165,8 +170,13 @@ contains
       call this%add_hours(this%minute / 60)
       this%minute = mod(this%minute, 60)
     else if (this%minute < 0) then
-      call this%add_hours(this%minute / 60 - 1)
-      this%minute = mod(this%minute, 60) + 60
+      if (mod(this%minute, 60) == 0) then
+        call this%add_hours(this%minute / 60)
+        this%minute = 0
+      else
+        call this%add_hours(this%minute / 60 - 1)
+        this%minute = mod(this%minute, 60) + 60
+      end if
     end if
 
   end subroutine add_minutes
@@ -182,8 +192,13 @@ contains
       call this%add_minutes(this%second / 60)
       this%second = mod(this%second, 60)
     else if (this%second < 0) then
-      call this%add_minutes(this%second / 60 - 1)
-      this%second = mod(this%second, 60) + 60
+      if (mod(this%second, 60) == 0) then
+        call this%add_minutes(this%second / 60)
+        this%second = 0
+      else
+        call this%add_minutes(this%second / 60 - 1)
+        this%second = mod(this%second, 60) + 60
+      end if
     end if
 
   end subroutine add_seconds
@@ -199,8 +214,13 @@ contains
       call this%add_seconds(this%millisecond / 1000)
       this%millisecond = mod(this%millisecond, 1000)
     else if (this%millisecond < 0) then
-      call this%add_seconds(this%millisecond / 1000 - 1)
-      this%millisecond = mod(this%millisecond, 1000) + 1000
+      if (mod(this%millisecond, 1000) == 0) then
+        call this%add_seconds(this%millisecond / 1000)
+        this%millisecond = 0
+      else
+        call this%add_seconds(this%millisecond / 1000 - 1)
+        this%millisecond = mod(this%millisecond, 1000) + 1000
+      end if
     end if
 
   end subroutine add_milliseconds
