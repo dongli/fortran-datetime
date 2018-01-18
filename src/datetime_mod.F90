@@ -49,12 +49,17 @@ module datetime_mod
     generic :: operator(<=) => le
   end type datetime_type
 
+  interface datetime
+    module procedure datetime_1
+    module procedure datetime_2
+  end interface datetime
+
 contains
 
-  elemental type(datetime_type) function datetime( &
+  elemental type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute, second, millisecond, &
                      days, hours, minutes, &
-      timezone)
+      timezone) result(res)
 
     integer, intent(in), optional :: year
     integer, intent(in), optional :: month
@@ -68,20 +73,34 @@ contains
     integer, intent(in), optional :: minutes
     real(8), intent(in), optional :: timezone
 
-    if (present(year))        datetime%year        = year
-    if (present(month))       datetime%month       = month
-    if (present(day))         datetime%day         = day
-    if (present(hour))        datetime%hour        = hour
-    if (present(minute))      datetime%minute      = minute
-    if (present(second))      datetime%second      = second
-    if (present(millisecond)) datetime%millisecond = millisecond
-    if (present(timezone))    datetime%timezone    = timezone
-    if (present(days))        call datetime%add_days(days)
-    if (present(hours))       call datetime%add_hours(hours)
-    if (present(minutes))     call datetime%add_minutes(minutes)
-    if (present(timezone))    datetime%timezone = timezone
+    if (present(year))        res%year        = year
+    if (present(month))       res%month       = month
+    if (present(day))         res%day         = day
+    if (present(hour))        res%hour        = hour
+    if (present(minute))      res%minute      = minute
+    if (present(second))      res%second      = second
+    if (present(millisecond)) res%millisecond = millisecond
+    if (present(timezone))    res%timezone    = timezone
+    if (present(days))        call res%add_days(days)
+    if (present(hours))       call res%add_hours(hours)
+    if (present(minutes))     call res%add_minutes(minutes)
+    if (present(timezone))    res%timezone = timezone
 
-  end function datetime
+  end function datetime_1
+
+  elemental type(datetime_type) function datetime_2(isoformat_str) result(res)
+
+    character(*), intent(in) :: isoformat_str
+
+    ! TODO: I assume UTC time for the time being.
+    read(isoformat_str(1:4), '(I4)') res%year
+    read(isoformat_str(6:7), '(I2)') res%month
+    read(isoformat_str(9:10), '(I2)') res%day
+    read(isoformat_str(12:13), '(I2)') res%hour
+    read(isoformat_str(15:16), '(I2)') res%minute
+    read(isoformat_str(18:19), '(I2)') res%second
+
+  end function datetime_2
 
   function isoformat(this) result(res)
 
