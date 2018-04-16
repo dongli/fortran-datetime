@@ -319,35 +319,56 @@ contains
     if (this%year < other%year) then
       gt = .false.
       return
+    else if (this%year > other%year) then
+      gt = .true.
+      return
     end if
 
     if (this%month < other%month) then
       gt = .false.
+      return
+    else if (this%month > other%month) then
+      gt = .true.
       return
     end if
 
     if (this%day < other%day) then
       gt = .false.
       return
+    else if (this%day > other%day) then
+      gt = .true.
+      return
     end if
 
     if (this%hour < other%hour) then
       gt = .false.
+      return
+    else if (this%hour > other%hour) then
+      gt = .true.
       return
     end if
 
     if (this%minute < other%minute) then
       gt = .false.
       return
+    else if (this%minute > other%minute) then
+      gt = .true.
+      return
     end if
 
     if (this%second < other%second) then
       gt = .false.
       return
+    else if (this%second > other%second) then
+      gt = .true.
+      return
     end if
 
     if (this%millisecond < other%millisecond) then
       gt = .false.
+      return
+    else if (this%millisecond < other%millisecond) then
+      gt = .true.
       return
     end if
 
