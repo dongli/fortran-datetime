@@ -14,18 +14,30 @@ program timedelta_test
   dt1 = timedelta(days=2)
 
   call assert_equal(dt1%total_seconds(), 2.0d0 * 86400.0d0)
+  call assert_equal(dt1%total_minutes(), 2.0d0 * 1440.0d0)
+  call assert_equal(dt1%total_hours(), 2.0d0 * 24.0d0)
+  call assert_equal(dt1%total_days(), 2.0d0)
 
   dt1 = timedelta(hours=3, minutes=30)
 
   call assert_equal(dt1%total_seconds(), 3.5d0 * 3600.0d0)
+  call assert_equal(dt1%total_minutes(), 3.5d0 * 60.0d0)
+  call assert_equal(dt1%total_hours(), 3.5d0)
+  call assert_equal(dt1%total_days(), 3.5d0 / 24.0d0)
 
   dt1 = timedelta(minutes=6)
 
   call assert_equal(dt1%total_seconds(), 360.0d0)
+  call assert_equal(dt1%total_minutes(), 6.0d0)
+  call assert_equal(dt1%total_hours(), 6.0d0 / 60.0d0)
+  call assert_equal(dt1%total_days(), 6.0d0 / 1440.0d0)
 
   dt1 = timedelta(seconds=60, milliseconds=103)
 
   call assert_equal(dt1%total_seconds(), 60.103d0)
+  call assert_equal(dt1%total_minutes(), 60.103d0 / 60.0d0)
+  call assert_equal(dt1%total_hours(), 60.103d0 / 3600.0d0)
+  call assert_equal(dt1%total_days(), 60.103d0 / 86400.0d0)
 
   dt1 = timedelta(seconds=33.1d0)
 

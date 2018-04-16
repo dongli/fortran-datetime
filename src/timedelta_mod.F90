@@ -10,6 +10,9 @@ module timedelta_mod
     integer :: milliseconds = 0
   contains
     procedure :: total_seconds
+    procedure :: total_minutes
+    procedure :: total_hours
+    procedure :: total_days
   end type timedelta_type
 
 contains
@@ -90,5 +93,29 @@ contains
     total_seconds = this%days * 86400 + this%hours * 3600 + this%minutes * 60 + this%seconds + this%milliseconds * 1.0d-3
 
   end function total_seconds
+
+  real(8) function total_minutes(this)
+
+    class(timedelta_type), intent(in) :: this
+
+    total_minutes = this%days * 1440 + this%hours * 60 + this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0
+
+  end function total_minutes
+
+  real(8) function total_hours(this)
+
+    class(timedelta_type), intent(in) :: this
+
+    total_hours = this%days * 24 + this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0
+
+  end function total_hours
+
+  real(8) function total_days(this)
+
+    class(timedelta_type), intent(in) :: this
+
+    total_days = this%days + (this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0) / 24.0d0
+
+  end function total_days
 
 end module timedelta_mod
