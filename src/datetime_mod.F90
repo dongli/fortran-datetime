@@ -31,7 +31,8 @@ module datetime_mod
     procedure :: add_milliseconds
     procedure, private :: assign
     procedure, private :: add
-    procedure, private :: sub
+    procedure, private :: sub_datetime
+    procedure, private :: sub_timedelta
     procedure, private :: eq
     procedure, private :: neq
     procedure, private :: gt
@@ -40,7 +41,8 @@ module datetime_mod
     procedure, private :: le
     generic :: assignment(=) => assign
     generic :: operator(+) => add
-    generic :: operator(-) => sub
+    generic :: operator(-) => sub_datetime
+    generic :: operator(-) => sub_timedelta
     generic :: operator(==) => eq
     generic :: operator(/=) => neq
     generic :: operator(>) => gt
@@ -273,7 +275,7 @@ contains
 
   end function add
 
-  elemental type(datetime_type) function sub(this, td) result(res)
+  pure elemental type(datetime_type) function sub_timedelta(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
     class(timedelta_type), intent(in) :: td
@@ -285,7 +287,121 @@ contains
     call res%add_hours(-td%hours)
     call res%add_days(-td%days)
 
-  end function sub
+  end function sub_timedelta
+
+  type(timedelta_type) recursive function sub_datetime(this, other) result(res)
+
+    class(datetime_type), intent(in) :: this
+    class(datetime_type), intent(in) :: other
+
+    integer year, month
+    integer days, hours, minutes, seconds, milliseconds
+
+    days = 0
+    hours = 0
+    minutes = 0
+    seconds = 0
+    milliseconds = 0
+
+    if (this >= other) then
+      if (this%year == other%year) then
+        if (this%month == other%month) then
+          if (this%day == other%day) then
+            if (this%hour == other%hour) then
+              if (this%minute == other%minute) then
+                if (this%second == other%second) then
+                  milliseconds = milliseconds + this%millisecond - other%millisecond
+                else
+                  seconds = seconds + this%second - other%second - 1
+                  milliseconds = milliseconds + 1000 - other%millisecond
+                  milliseconds = milliseconds + this%millisecond
+                end if
+              else
+                minutes = minutes + this%minute - other%minute - 1
+                seconds = seconds + 60 - other%second - 1
+                seconds = seconds + this%second
+                milliseconds = milliseconds + 1000 - other%millisecond
+                milliseconds = milliseconds + this%millisecond
+              end if
+            else
+              hours = hours + this%hour - other%hour - 1
+              minutes = minutes + 60 - other%minute - 1
+              minutes = minutes + this%minute
+              seconds = seconds + 60 - other%second - 1
+              seconds = seconds + this%second
+              milliseconds = milliseconds + 1000 - other%millisecond
+              milliseconds = milliseconds + this%millisecond
+            end if
+          else
+            days = days + this%day - other%day - 1
+            hours = hours + 24 - other%hour - 1
+            hours = hours + this%hour
+            minutes = minutes + 60 - other%minute - 1
+            minutes = minutes + this%minute
+            seconds = seconds + 60 - other%second - 1
+            seconds = seconds + this%second
+            milliseconds = milliseconds + 1000 - other%millisecond
+            milliseconds = milliseconds + this%millisecond
+          end if
+        else
+          do month = other%month + 1, this%month - 1
+            days = days + days_of_month(this%year, month)
+          end do
+          days = days + days_of_month(other%year, other%month) - other%day - 1
+          days = days + this%day
+          hours = hours + 24 - other%hour - 1
+          hours = hours + this%hour
+          minutes = minutes + 60 - other%minute - 1
+          minutes = minutes + this%minute
+          seconds = seconds + 60 - other%second - 1
+          seconds = seconds + this%second
+          milliseconds = milliseconds + 1000 - other%millisecond
+          milliseconds = milliseconds + this%millisecond
+        end if
+      else
+        do year = other%year + 1, this%year - 1
+          days = days + 365 + merge(1, 0, is_leap_year(year))
+        end do
+        do month = other%month + 1, 12
+          days = days + days_of_month(other%year, month)
+        end do
+        do month = 1, this%month - 1
+          days = days + days_of_month(this%year, month)
+        end do
+        days = days + days_of_month(other%year, other%month) - other%day - 1
+        days = days + this%day
+        hours = hours + 24 - other%hour - 1
+        hours = hours + this%hour
+        minutes = minutes + 60 - other%minute - 1
+        minutes = minutes + this%minute
+        seconds = seconds + 60 - other%second - 1
+        seconds = seconds + this%second
+        milliseconds = milliseconds + 1000 - other%millisecond
+        milliseconds = milliseconds + this%millisecond
+      end if
+      ! Carry over.
+      if (milliseconds >= 1000) then
+        milliseconds = milliseconds - 1000
+        seconds = seconds + 1
+      end if
+      if (seconds >= 60) then
+        seconds = seconds - 60
+        minutes = minutes + 1
+      end if
+      if (minutes >= 60) then
+        minutes = minutes - 60
+        hours = hours + 1
+      end if
+      if (hours >= 24) then
+        hours = hours - 24
+        days = days + 1
+      end if
+      res = timedelta(days, hours, minutes, seconds, milliseconds)
+    else
+      res = sub_datetime(other, this)
+    end if
+
+  end function sub_datetime
 
   pure elemental logical function eq(this, other)
 

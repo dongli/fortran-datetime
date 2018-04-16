@@ -59,6 +59,10 @@ program datetime_test
   call assert_true(a /= b)
   call assert_equal(a%minute - 5, b%minute)
 
+  a = datetime(2018, 1, 18, 13, 14, 12)
+  b = datetime(2018, 1, 13, 12, 45, 13)
+  call assert_true(a > b)
+
   ! Test construction from minute and hour.
   a = datetime(minute=6)
   b = datetime(hour=1)
@@ -191,6 +195,69 @@ program datetime_test
   call assert_equal(a%year, 2016)
   call assert_equal(a%month, 8)
   call assert_equal(a%day, 1)
+
+  a = datetime(2018, 1, 1, 0, 0, 0)
+  b = datetime(2018, 1, 1, 0, 0, 0)
+  dt = a - b  
+  call assert_equal(dt%days, 0)
+  call assert_equal(dt%hours, 0)
+  call assert_equal(dt%minutes, 0)
+  call assert_equal(dt%seconds, 0)
+  call assert_equal(dt%milliseconds, 0)
+
+  a = datetime(2018, 1, 18, 13, 14, 12)
+  b = datetime(2018, 1, 13, 12, 45, 13)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 59)
+  call assert_equal(dt%minutes, 28)
+  call assert_equal(dt%hours, 0)
+  call assert_equal(dt%days, 5)
+
+  a = datetime(2018, 1, 18, 0, 0, 0)
+  b = datetime(2018, 1, 13, 0, 0, 0)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 0)
+  call assert_equal(dt%minutes, 0)
+  call assert_equal(dt%hours, 0)
+  call assert_equal(dt%days, 5)
+
+  a = datetime(2017, 2, 18, 13, 37, 20)
+  b = datetime(2018, 1, 13, 0, 0, 0)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 40)
+  call assert_equal(dt%minutes, 22)
+  call assert_equal(dt%hours, 10)
+  call assert_equal(dt%days, 328)
+
+  a = datetime(2018, 4, 18, 13, 37, 20)
+  b = datetime(2018, 4, 18, 13, 37, 10)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 10)
+  call assert_equal(dt%minutes, 0)
+  call assert_equal(dt%hours, 0)
+  call assert_equal(dt%days, 0)
+
+  a = datetime(2018, 4, 18, 13, 37, 0)
+  b = datetime(2018, 4, 18, 13, 34, 0)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 0)
+  call assert_equal(dt%minutes, 3)
+  call assert_equal(dt%hours, 0)
+  call assert_equal(dt%days, 0)
+
+  a = datetime(2018, 4, 18, 13, 0, 0)
+  b = datetime(2018, 4, 18, 12, 0, 0)
+  dt = a - b
+  call assert_equal(dt%milliseconds, 0)
+  call assert_equal(dt%seconds, 0)
+  call assert_equal(dt%minutes, 0)
+  call assert_equal(dt%hours, 1)
+  call assert_equal(dt%days, 0)
 
   call test_case_report('Test datetime type')
 
