@@ -7,7 +7,7 @@ project (FortranDatetime Fortran)
 set (version 0.0.2)
  
 set (CMAKE_Fortran_FLAGS "-ffree-line-length-none")
-set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/fortran_datetime")
+set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/.mods")
 
 set (sources
   "${PROJECT_SOURCE_DIR}/src/timedelta_mod.F90"
