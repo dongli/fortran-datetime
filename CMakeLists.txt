@@ -6,7 +6,6 @@ project (FortranDatetime Fortran)
 
 set (version 0.0.2)
  
-set (CMAKE_Fortran_FLAGS "-ffree-line-length-none")
 set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/.mods")
 
 set (sources
@@ -33,7 +32,11 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
   LIBRARY DESTINATION lib
 )
 
-install (DIRECTORY "${CMAKE_BINARY_DIR}/fortran_datetime" DESTINATION include)
+install (FILES
+  "${CMAKE_BINARY_DIR}/.mods/datetime_mod.mod"
+  "${CMAKE_BINARY_DIR}/.mods/timedelta_mod.mod"
+  DESTINATION include/fortran_datetime
+)
 
 include (CMakePackageConfigHelpers)
 write_basic_package_version_file (
