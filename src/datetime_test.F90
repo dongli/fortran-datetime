@@ -259,6 +259,14 @@ program datetime_test
   call assert_equal(dt%hours, 1)
   call assert_equal(dt%days, 0)
 
+  a = datetime(year=2017, month=10, day=6, hour=14)
+  b = datetime(year=2018, month=4, day=16, hour=23, minute=51)
+  dt = b - a
+  call assert_equal(dt%total_seconds(), 16624260.0d0)
+  call assert_equal(dt%total_minutes(), 16624260.0d0 / 60.0d0)
+  call assert_equal(dt%total_hours(), 16624260 / 3600.0d0)
+  call assert_equal(dt%total_days(), 16624260 / 86400.0d0)
+
   call test_case_report('Test datetime type')
 
   call test_case_final()

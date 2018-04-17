@@ -22,4 +22,13 @@ b = a + dt
 
 write(6, *) a%isoformat() ! => 2017-10-06T14:06:00Z
 
+b = datetime(year=2018, month=4, day=16, hour=23, minute=51)
+
+dt = b - a
+
+write(6, *) dt%total_seconds() ! => 16624260.0
+write(6, *) dt%total_minutes() ! => 277071.0
+write(6, *) dt%total_hours()   ! => 4617.85
+write(6, *) dt%total_days()    ! => 192.4104166666667
+
 ```
