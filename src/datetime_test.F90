@@ -25,6 +25,18 @@ program datetime_test
   call assert_approximate(a%timezone, 0.0d0)
   call assert_equal(a%isoformat(), '2017-10-06T12:31:23Z')
 
+  a = datetime('2018041401', '%Y%m%d%H')
+  call assert_equal(a%isoformat(), '2018-04-14T01:00:00Z')
+
+  a = datetime('2018041401', '%x')
+  call assert_equal(a%year, -1)
+  call assert_equal(a%month, -1)
+  call assert_equal(a%day, -1)
+  call assert_equal(a%hour, -1)
+  call assert_equal(a%minute, -1)
+  call assert_equal(a%second, -1)
+  call assert_equal(a%millisecond, -1)
+
   ! Test parse isoformat.
   a = datetime('2018-01-18T11:51:10Z')
   call assert_equal(a%year, 2018)

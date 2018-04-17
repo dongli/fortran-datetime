@@ -58,7 +58,7 @@ module datetime_mod
 
 contains
 
-  elemental type(datetime_type) function datetime_1( &
+  type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute, second, millisecond, &
                      days, hours, minutes, &
       timezone) result(res)
@@ -90,17 +90,67 @@ contains
 
   end function datetime_1
 
-  elemental type(datetime_type) function datetime_2(isoformat_str) result(res)
+  type(datetime_type) function datetime_2(datetime_str, format_str) result(res)
 
-    character(*), intent(in) :: isoformat_str
+    character(*), intent(in) :: datetime_str
+    character(*), intent(in), optional :: format_str
 
-    ! TODO: I assume UTC time for the time being.
-    read(isoformat_str(1:4), '(I4)') res%year
-    read(isoformat_str(6:7), '(I2)') res%month
-    read(isoformat_str(9:10), '(I2)') res%day
-    read(isoformat_str(12:13), '(I2)') res%hour
-    read(isoformat_str(15:16), '(I2)') res%minute
-    read(isoformat_str(18:19), '(I2)') res%second
+    integer i, j, num_spec
+    character(1), allocatable :: specs(:) ! Date time element specifiers (e.g. 'Y', 'm', 'd')
+
+    if (present(format_str)) then
+      num_spec = 0
+      do i = 1, len_trim(format_str)
+        if (format_str(i:i) == '%') num_spec = num_spec + 1
+      end do
+
+      allocate(specs(num_spec))
+
+      i = 1
+      j = 0
+      do while (i <= len_trim(format_str))
+        if (format_str(i:i) == '%') then
+          i = i + 1
+          j = j + 1
+          specs(j:j) = format_str(i:i)
+        end if
+        i = i + 1
+      end do
+
+      j = 1
+      do i = 1, num_spec
+        select case (specs(i))
+        case ('Y')
+          read(datetime_str(j:j+3), '(I4)') res%year
+          j = j + 4
+        case ('m')
+          read(datetime_str(j:j+1), '(I2)') res%month
+          j = j + 2
+        case ('d')
+          read(datetime_str(j:j+1), '(I2)') res%day
+          j = j + 2
+        case ('H')
+          read(datetime_str(j:j+1), '(I2)') res%hour
+          j = j + 2
+        case ('M')
+          read(datetime_str(j:j+1), '(I2)') res%minute
+          j = j + 2
+        case ('S')
+          read(datetime_str(j:j+1), '(I2)') res%second
+          j = j + 2
+        case default
+          res = datetime(year=-1, month=-1, day=-1, hour=-1, minute=-1, second=-1, millisecond=-1)
+        end select
+      end do
+    else
+      ! TODO: I assume UTC time for the time being.
+      read(datetime_str(1:4), '(I4)') res%year
+      read(datetime_str(6:7), '(I2)') res%month
+      read(datetime_str(9:10), '(I2)') res%day
+      read(datetime_str(12:13), '(I2)') res%hour
+      read(datetime_str(15:16), '(I2)') res%minute
+      read(datetime_str(18:19), '(I2)') res%second
+    end if
 
   end function datetime_2
 
