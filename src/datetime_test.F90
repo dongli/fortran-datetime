@@ -22,7 +22,7 @@ program datetime_test
   call assert_equal(a%minute, 31)
   call assert_equal(a%second, 23)
   call assert_equal(a%millisecond, 0)
-  call assert_approximate(a%timezone, 0.0d0)
+  call assert_approximate(a%timezone, 0.0)
   call assert_equal(a%isoformat(), '2017-10-06T12:31:23Z')
 
   a = datetime('2018041401', '%Y%m%d%H')
@@ -46,7 +46,7 @@ program datetime_test
   call assert_equal(a%minute, 51)
   call assert_equal(a%second, 10)
   call assert_equal(a%millisecond, 0)
-  call assert_approximate(a%timezone, 0.0d0)
+  call assert_approximate(a%timezone, 0.0)
 
   ! Test assignment and equal judgement.
   b = a
@@ -211,73 +211,73 @@ program datetime_test
   a = datetime(2018, 1, 1, 0, 0, 0)
   b = datetime(2018, 1, 1, 0, 0, 0)
   dt = a - b  
-  call assert_equal(dt%days, 0)
-  call assert_equal(dt%hours, 0)
-  call assert_equal(dt%minutes, 0)
-  call assert_equal(dt%seconds, 0)
+  call assert_equal(dt%days, 0.0)
+  call assert_equal(dt%hours, 0.0)
+  call assert_equal(dt%minutes, 0.0)
+  call assert_equal(dt%seconds, 0.0)
   call assert_equal(dt%milliseconds, 0)
 
   a = datetime(2018, 1, 18, 13, 14, 12)
   b = datetime(2018, 1, 13, 12, 45, 13)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 59)
-  call assert_equal(dt%minutes, 28)
-  call assert_equal(dt%hours, 0)
-  call assert_equal(dt%days, 5)
+  call assert_equal(dt%seconds, 59.0)
+  call assert_equal(dt%minutes, 28.0)
+  call assert_equal(dt%hours, 0.0)
+  call assert_equal(dt%days, 5.0)
 
   a = datetime(2018, 1, 18, 0, 0, 0)
   b = datetime(2018, 1, 13, 0, 0, 0)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 0)
-  call assert_equal(dt%minutes, 0)
-  call assert_equal(dt%hours, 0)
-  call assert_equal(dt%days, 5)
+  call assert_equal(dt%seconds, 0.0)
+  call assert_equal(dt%minutes, 0.0)
+  call assert_equal(dt%hours, 0.0)
+  call assert_equal(dt%days, 5.0)
 
   a = datetime(2017, 2, 18, 13, 37, 20)
   b = datetime(2018, 1, 13, 0, 0, 0)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 40)
-  call assert_equal(dt%minutes, 22)
-  call assert_equal(dt%hours, 10)
-  call assert_equal(dt%days, 328)
+  call assert_equal(dt%seconds, 40.0)
+  call assert_equal(dt%minutes, 22.0)
+  call assert_equal(dt%hours, 10.0)
+  call assert_equal(dt%days, 328.0)
 
   a = datetime(2018, 4, 18, 13, 37, 20)
   b = datetime(2018, 4, 18, 13, 37, 10)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 10)
-  call assert_equal(dt%minutes, 0)
-  call assert_equal(dt%hours, 0)
-  call assert_equal(dt%days, 0)
+  call assert_equal(dt%seconds, 10.0)
+  call assert_equal(dt%minutes, 0.0)
+  call assert_equal(dt%hours, 0.0)
+  call assert_equal(dt%days, 0.0)
 
   a = datetime(2018, 4, 18, 13, 37, 0)
   b = datetime(2018, 4, 18, 13, 34, 0)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 0)
-  call assert_equal(dt%minutes, 3)
-  call assert_equal(dt%hours, 0)
-  call assert_equal(dt%days, 0)
+  call assert_equal(dt%seconds, 0.0)
+  call assert_equal(dt%minutes, 3.0)
+  call assert_equal(dt%hours, 0.0)
+  call assert_equal(dt%days, 0.0)
 
   a = datetime(2018, 4, 18, 13, 0, 0)
   b = datetime(2018, 4, 18, 12, 0, 0)
   dt = a - b
   call assert_equal(dt%milliseconds, 0)
-  call assert_equal(dt%seconds, 0)
-  call assert_equal(dt%minutes, 0)
-  call assert_equal(dt%hours, 1)
-  call assert_equal(dt%days, 0)
+  call assert_equal(dt%seconds, 0.0)
+  call assert_equal(dt%minutes, 0.0)
+  call assert_equal(dt%hours, 1.0)
+  call assert_equal(dt%days, 0.0)
 
   a = datetime(year=2017, month=10, day=6, hour=14)
   b = datetime(year=2018, month=4, day=16, hour=23, minute=51)
   dt = b - a
-  call assert_equal(dt%total_seconds(), 16624260.0d0)
-  call assert_equal(dt%total_minutes(), 16624260.0d0 / 60.0d0)
-  call assert_equal(dt%total_hours(), 16624260 / 3600.0d0)
-  call assert_equal(dt%total_days(), 16624260 / 86400.0d0)
+  call assert_equal(dt%total_seconds(), 16624260.0)
+  call assert_equal(dt%total_minutes(), 16624260.0 / 60.0)
+  call assert_equal(dt%total_hours(), 16624260 / 3600.0)
+  call assert_equal(dt%total_days(), 16624260 / 86400.0)
 
   call test_case_report('Test datetime type')
 

@@ -184,11 +184,16 @@ contains
   pure subroutine add_days(this, days)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: days
+    class(*), intent(in) :: days
 
     integer month_days
 
-    this%day = this%day + days
+    select type (days)
+    type is (integer)
+      this%day = this%day + days
+    type is (real(8))
+      this%day = this%day + days
+    end select
 
     do
       if (this%day < 1) then
@@ -211,9 +216,14 @@ contains
   pure subroutine add_hours(this, hours)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: hours
+    class(*), intent(in) :: hours
 
-    this%hour = this%hour + hours
+    select type (hours)
+    type is (integer)
+      this%hour = this%hour + hours
+    type is (real(8))
+      this%hour = this%hour + hours
+    end select
 
     if (this%hour >= 24) then
       call this%add_days(this%hour / 24)
@@ -233,9 +243,14 @@ contains
   pure subroutine add_minutes(this, minutes)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: minutes
+    class(*), intent(in) :: minutes
 
-    this%minute = this%minute + minutes
+    select type (minutes)
+    type is (integer)
+      this%minute = this%minute + minutes
+    type is (real(8))
+      this%minute = this%minute + minutes
+    end select
 
     if (this%minute >= 60) then
       call this%add_hours(this%minute / 60)
@@ -255,9 +270,14 @@ contains
   pure subroutine add_seconds(this, seconds)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: seconds
+    class(*), intent(in) :: seconds
 
-    this%second = this%second + seconds
+    select type (seconds)
+    type is (integer)
+      this%second = this%second + seconds
+    type is (real(8))
+      this%second = this%second + seconds
+    end select
 
     if (this%second >= 60) then
       call this%add_minutes(this%second / 60)

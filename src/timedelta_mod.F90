@@ -3,10 +3,10 @@ module timedelta_mod
   implicit none
 
   type timedelta_type
-    integer :: days = 0
-    integer :: hours = 0
-    integer :: minutes = 0
-    integer :: seconds = 0
+    real(8) :: days = 0
+    real(8) :: hours = 0
+    real(8) :: minutes = 0
+    real(8) :: seconds = 0
     integer :: milliseconds = 0
   contains
     procedure :: total_seconds
@@ -34,8 +34,7 @@ contains
       type is (integer)
         res%days = days
       type is (real(8))
-        res%days = floor(days)
-        remainder = days - res%days
+        res%days = days
       end select
     end if
 
@@ -44,12 +43,8 @@ contains
       type is (integer)
         res%hours = hours
       type is (real(8))
-        res%hours = floor(hours + remainder * 24)
-        remainder = hours + remainder * 24 - res%hours
+        res%hours = hours
       end select
-    else
-      res%hours = floor(remainder * 24)
-      remainder = remainder * 24 - res%hours
     end if
 
     if (present(minutes)) then
@@ -57,12 +52,8 @@ contains
       type is (integer)
         res%minutes = minutes
       type is (real(8))
-        res%minutes = floor(minutes + remainder * 60)
-        remainder = minutes + remainder * 60 - res%minutes
+        res%minutes = minutes
       end select
-    else
-      res%minutes = floor(remainder * 60)
-      remainder = remainder * 60 - res%minutes
     end if
 
     if (present(seconds)) then
@@ -70,18 +61,12 @@ contains
       type is (integer)
         res%seconds = seconds
       type is (real(8))
-        res%seconds = floor(seconds + remainder * 60)
-        remainder = seconds + remainder * 60 - res%seconds
+        res%seconds = seconds
       end select
-    else
-      res%seconds = floor(remainder * 60)
-      remainder = remainder * 60 - res%seconds
     end if
 
     if (present(milliseconds)) then
-      res%milliseconds = milliseconds + remainder * 1000
-    else
-      res%milliseconds = remainder * 1000
+      res%milliseconds = milliseconds
     end if
 
   end function timedelta
