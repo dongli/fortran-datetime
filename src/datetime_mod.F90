@@ -100,8 +100,16 @@ contains
 
     if (present(format_str)) then
       num_spec = 0
-      do i = 1, len_trim(format_str)
-        if (format_str(i:i) == '%') num_spec = num_spec + 1
+      i = 1
+      do while (i <= len_trim(format_str))
+        if (format_str(i:i) == '%') then
+          ! % character consumes 1 character specifier.
+          num_spec = num_spec + 1
+          i = i + 2
+        else
+          num_spec = num_spec + 1
+          i = i + 1
+        end if
       end do
 
       allocate(specs(num_spec))
@@ -113,33 +121,36 @@ contains
           i = i + 1
           j = j + 1
           specs(j:j) = format_str(i:i)
+        else
+          j = j + 1
+          specs(j:j) = format_str(i:i)
         end if
         i = i + 1
       end do
 
-      j = 1
-      do i = 1, num_spec
-        select case (specs(i))
+      i = 1
+      do j = 1, num_spec
+        select case (specs(j))
         case ('Y')
-          read(datetime_str(j:j+3), '(I4)') res%year
-          j = j + 4
+          read(datetime_str(i:i+3), '(I4)') res%year
+          i = i + 4
         case ('m')
-          read(datetime_str(j:j+1), '(I2)') res%month
-          j = j + 2
+          read(datetime_str(i:i+1), '(I2)') res%month
+          i = i + 2
         case ('d')
-          read(datetime_str(j:j+1), '(I2)') res%day
-          j = j + 2
+          read(datetime_str(i:i+1), '(I2)') res%day
+          i = i + 2
         case ('H')
-          read(datetime_str(j:j+1), '(I2)') res%hour
-          j = j + 2
+          read(datetime_str(i:i+1), '(I2)') res%hour
+          i = i + 2
         case ('M')
-          read(datetime_str(j:j+1), '(I2)') res%minute
-          j = j + 2
+          read(datetime_str(i:i+1), '(I2)') res%minute
+          i = i + 2
         case ('S')
-          read(datetime_str(j:j+1), '(I2)') res%second
-          j = j + 2
+          read(datetime_str(i:i+1), '(I2)') res%second
+          i = i + 2
         case default
-          res = datetime(year=-1, month=-1, day=-1, hour=-1, minute=-1, second=-1, millisecond=-1)
+          i = i + 1
         end select
       end do
     else
