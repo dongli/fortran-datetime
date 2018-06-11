@@ -17,7 +17,7 @@ add_library (fortran_datetime SHARED ${sources})
 set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
-if (NOT CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+if (RUN_TEST)
   find_package (FortranUnitTest)
 
   add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
