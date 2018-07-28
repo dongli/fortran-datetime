@@ -23,12 +23,14 @@ module datetime_mod
     real(8) :: timezone = 0.0d0
   contains
     procedure :: isoformat
+    procedure :: format
     procedure :: add_months
     procedure :: add_days
     procedure :: add_hours
     procedure :: add_minutes
     procedure :: add_seconds
     procedure :: add_milliseconds
+    procedure :: days_in_year
     procedure, private :: assign
     procedure, private :: add
     procedure, private :: sub_datetime
@@ -74,8 +76,8 @@ contains
     integer, intent(in), optional :: days
     integer, intent(in), optional :: hours
     integer, intent(in), optional :: minutes
-    real(8), intent(in), optional :: timestamp
-    real(8), intent(in), optional :: timezone
+    class(*), intent(in), optional :: timestamp
+    class(*), intent(in), optional :: timezone
 
     real(8) residue_seconds
 
@@ -88,7 +90,14 @@ contains
       res%minute = 0
       res%second = 0
       res%millisecond = 0
-      residue_seconds = timestamp
+      select type (timestamp)
+      type is (integer)
+        residue_seconds = timestamp
+      type is (real(4))
+        residue_seconds = timestamp
+      type is (real(8))
+        residue_seconds = timestamp
+      end select
       call res%add_days(int(residue_seconds / 86400.0))
       residue_seconds = mod(residue_seconds, 86400.0)
       call res%add_hours(int(residue_seconds / 3600.0))
@@ -104,12 +113,20 @@ contains
       if (present(minute))      res%minute      = minute
       if (present(second))      res%second      = second
       if (present(millisecond)) res%millisecond = millisecond
-      if (present(timezone))    res%timezone    = timezone
       if (present(days))        call res%add_days(days)
       if (present(hours))       call res%add_hours(hours)
       if (present(minutes))     call res%add_minutes(minutes)
     end if
-    if (present(timezone))      res%timezone = timezone
+    if (present(timezone)) then
+      select type (timezone)
+      type is (integer)
+        res%timezone = timezone
+      type is (real(4))
+        res%timezone = timezone
+      type is (real(8))
+        res%timezone = timezone
+      end select
+    end if
 
   end function datetime_1
 
@@ -197,6 +214,55 @@ contains
       this%year, this%month, this%day, this%hour, this%minute, this%second
 
   end function isoformat
+
+  function format(this, format_str) result(res)
+
+    class(datetime_type), intent(in) :: this
+    character(*), intent(in) :: format_str
+    character(100) res
+
+    integer i, j
+
+    res = ''
+    i = 1
+    j = 1
+    do while (i <= len_trim(format_str))
+      if (format_str(i:i) == '%') then
+        i = i + 1
+        select case (format_str(i:i))
+        case ('Y')
+          write(res(j:j+3), '(I4.4)') this%year
+          j = j + 4
+        case ('y')
+          write(res(j:j+1), '(I2.2)') mod(this%year, 100)
+          j = j + 2
+        case ('j')
+          write(res(j:j+2), '(I3.3)') this%days_in_year()
+          j = j + 3
+        case ('m')
+          write(res(j:j+1), '(I2.2)') this%month
+          j = j + 2
+        case ('d')
+          write(res(j:j+1), '(I2.2)') this%day
+          j = j + 2
+        case ('H')
+          write(res(j:j+1), '(I2.2)') this%hour
+          j = j + 2
+        case ('M')
+          write(res(j:j+1), '(I2.2)') this%minute
+          j = j + 2
+        case ('S')
+          write(res(j:j+1), '(I2.2)') this%second
+          j = j + 2
+        end select
+        i = i + 1
+      else
+        write(res(j:j), '(A1)') format_str(i:i)
+        j = j + 1
+      end if
+    end do
+
+  end function format
 
   pure subroutine add_months(this, months)
 
@@ -349,6 +415,20 @@ contains
     end if
 
   end subroutine add_milliseconds
+
+  pure integer function days_in_year(this) result(res)
+
+    class(datetime_type), intent(in) :: this
+
+    integer month
+
+    res = 0
+    do month = 1, this%month - 1
+      res = res + days_of_month(this%year, month)
+    end do
+    res = res + this%day
+
+  end function days_in_year
 
   pure elemental subroutine assign(this, other)
 

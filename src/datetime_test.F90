@@ -29,6 +29,8 @@ program datetime_test
 
   a = datetime('2018041401', '%Y%m%d%H')
   call assert_equal(a%isoformat(), '2018-04-14T01:00:00Z', file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(trim(a%format('%Y')), '2018', file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(a%format('%y%j%H%M'), '181040100', file_name=__FILE__, line_number=__LINE__)
 
   ! Test parse isoformat.
   a = datetime('2018-01-18T11:51:10Z')
