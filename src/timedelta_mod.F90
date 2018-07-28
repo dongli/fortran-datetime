@@ -33,6 +33,8 @@ contains
       select type (days)
       type is (integer)
         res%days = days
+      type is (real(4))
+        res%days = days
       type is (real(8))
         res%days = days
       end select
@@ -41,6 +43,8 @@ contains
     if (present(hours)) then
       select type (hours)
       type is (integer)
+        res%hours = hours
+      type is (real(4))
         res%hours = hours
       type is (real(8))
         res%hours = hours
@@ -51,6 +55,8 @@ contains
       select type (minutes)
       type is (integer)
         res%minutes = minutes
+      type is (real(4))
+        res%minutes = minutes
       type is (real(8))
         res%minutes = minutes
       end select
@@ -59,6 +65,8 @@ contains
     if (present(seconds)) then
       select type (seconds)
       type is (integer)
+        res%seconds = seconds
+      type is (real(4))
         res%seconds = seconds
       type is (real(8))
         res%seconds = seconds

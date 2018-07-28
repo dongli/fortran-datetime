@@ -61,6 +61,7 @@ contains
   type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute, second, millisecond, &
                      days, hours, minutes, &
+      timestamp, &
       timezone) result(res)
 
     integer, intent(in), optional :: year
@@ -73,20 +74,42 @@ contains
     integer, intent(in), optional :: days
     integer, intent(in), optional :: hours
     integer, intent(in), optional :: minutes
+    real(8), intent(in), optional :: timestamp
     real(8), intent(in), optional :: timezone
 
-    if (present(year))        res%year        = year
-    if (present(month))       res%month       = month
-    if (present(day))         res%day         = day
-    if (present(hour))        res%hour        = hour
-    if (present(minute))      res%minute      = minute
-    if (present(second))      res%second      = second
-    if (present(millisecond)) res%millisecond = millisecond
-    if (present(timezone))    res%timezone    = timezone
-    if (present(days))        call res%add_days(days)
-    if (present(hours))       call res%add_hours(hours)
-    if (present(minutes))     call res%add_minutes(minutes)
-    if (present(timezone))    res%timezone = timezone
+    real(8) residue_seconds
+
+    if (present(timestamp)) then
+      ! Assume the start date time is UTC 1970-01-01 00:00:00.
+      res%year = 1970
+      res%month = 1
+      res%day = 1
+      res%hour = 0
+      res%minute = 0
+      res%second = 0
+      res%millisecond = 0
+      residue_seconds = timestamp
+      call res%add_days(int(residue_seconds / 86400.0))
+      residue_seconds = mod(residue_seconds, 86400.0)
+      call res%add_hours(int(residue_seconds / 3600.0))
+      residue_seconds = mod(residue_seconds, 3600.0)
+      call res%add_minutes(int(residue_seconds / 60.0))
+      residue_seconds = mod(residue_seconds, 60.0)
+      call res%add_seconds(int(residue_seconds))
+    else
+      if (present(year))        res%year        = year
+      if (present(month))       res%month       = month
+      if (present(day))         res%day         = day
+      if (present(hour))        res%hour        = hour
+      if (present(minute))      res%minute      = minute
+      if (present(second))      res%second      = second
+      if (present(millisecond)) res%millisecond = millisecond
+      if (present(timezone))    res%timezone    = timezone
+      if (present(days))        call res%add_days(days)
+      if (present(hours))       call res%add_hours(hours)
+      if (present(minutes))     call res%add_minutes(minutes)
+    end if
+    if (present(timezone))      res%timezone = timezone
 
   end function datetime_1
 
