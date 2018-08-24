@@ -23,7 +23,7 @@ A CMake-Setup is provided.
 
 <sub>Go to [Top](#top)</sub>
 
-# Example
+## Example
 
 ```
 use datetime
