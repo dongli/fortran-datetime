@@ -6,7 +6,7 @@ module datetime_mod
 
   private
 
-  public datetime
+  public set_datetime
   public datetime_type
   public days_of_month
   public days_of_year
@@ -22,6 +22,7 @@ module datetime_mod
     integer :: millisecond = 0
     real(8) :: timezone = 0.0d0
   contains
+    procedure :: init
     procedure :: isoformat
     procedure :: format
     procedure :: add_months
@@ -53,12 +54,30 @@ module datetime_mod
     generic :: operator(<=) => le
   end type datetime_type
 
-  interface datetime
+  interface set_datetime
     module procedure datetime_1
     module procedure datetime_2
-  end interface datetime
+  end interface set_datetime
 
 contains
+  
+  subroutine init(this)
+  
+    class(datetime_type), intent(inout) :: this
+    
+    integer  values(8)
+  
+    call date_and_time(VALUES=values)
+   
+    this%year = values(1)
+    this%month = values(2)
+    this%day = values(3)
+    this%hour = values(5)
+    this%minute = values(6)
+    this%second = values(7)
+    this%millisecond = values(8)
+  
+  end subroutine init
 
   type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute, second, millisecond, &

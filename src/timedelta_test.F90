@@ -1,7 +1,7 @@
 program timedelta_test
 
   use unit_test
-  use timedelta_mod
+  use datetime
 
   implicit none
 

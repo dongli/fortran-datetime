@@ -3,10 +3,10 @@ module timedelta_mod
   implicit none
 
   type timedelta_type
-    real(8) :: days = 0
-    real(8) :: hours = 0
-    real(8) :: minutes = 0
-    real(8) :: seconds = 0
+    real(8) :: days = 0.0d0
+    real(8) :: hours = 0.0d0
+    real(8) :: minutes = 0.0d0
+    real(8) :: seconds = 0.0d0
     integer :: milliseconds = 0
   contains
     procedure :: total_seconds
