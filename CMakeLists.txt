@@ -12,8 +12,9 @@ endif ()
 set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/.mods")
 
 set (sources
-  "${PROJECT_SOURCE_DIR}/src/timedelta_mod.F90"
-  "${PROJECT_SOURCE_DIR}/src/datetime_mod.F90"
+  src/timedelta_mod.F90
+  src/datetime_mod.F90
+  src/datetime.F90
 )
 
 add_library (fortran_datetime SHARED ${sources})

@@ -6,6 +6,7 @@ module datetime_mod
 
   private
 
+  public create_datetime
   public set_datetime
   public datetime_type
   public days_of_month
@@ -19,7 +20,7 @@ module datetime_mod
     integer :: hour = 0
     integer :: minute = 0
     integer :: second = 0
-    integer :: millisecond = 0
+    real(8) :: millisecond = 0
     real(8) :: timezone = 0.0d0
   contains
     procedure :: init
@@ -53,6 +54,11 @@ module datetime_mod
     generic :: operator(<) => lt
     generic :: operator(<=) => le
   end type datetime_type
+
+  interface create_datetime
+    module procedure datetime_1
+    module procedure datetime_2
+  end interface create_datetime
 
   interface set_datetime
     module procedure datetime_1
@@ -305,14 +311,24 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: days
 
+    real(8) residue_days
     integer month_days
 
     select type (days)
     type is (integer)
+      residue_days = 0
+      this%day = this%day + days
+    type is (real(4))
+      residue_days = days - int(days)
       this%day = this%day + days
     type is (real(8))
+      residue_days = days - int(days)
       this%day = this%day + days
     end select
+
+    if (residue_days /= 0) then
+      call this%add_hours(residue_days * 24)
+    end if
 
     do
       if (this%day < 1) then
@@ -337,12 +353,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: hours
 
+    real(8) residue_hours
+
     select type (hours)
     type is (integer)
+      residue_hours = 0
+      this%hour = this%hour + hours
+    type is (real(4))
+      residue_hours = hours - int(hours)
       this%hour = this%hour + hours
     type is (real(8))
+      residue_hours = hours - int(hours)
       this%hour = this%hour + hours
     end select
+
+    if (residue_hours /= 0) then
+      call this%add_minutes(residue_hours * 60)
+    end if
 
     if (this%hour >= 24) then
       call this%add_days(this%hour / 24)
@@ -364,12 +391,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: minutes
 
+    real(8) residue_minutes
+
     select type (minutes)
     type is (integer)
+      residue_minutes = 0
+      this%minute = this%minute + minutes
+    type is (real(4))
+      residue_minutes = minutes - int(minutes)
       this%minute = this%minute + minutes
     type is (real(8))
+      residue_minutes = minutes - int(minutes)
       this%minute = this%minute + minutes
     end select
+
+    if (residue_minutes /= 0) then
+      call this%add_seconds(residue_minutes * 60)
+    end if
 
     if (this%minute >= 60) then
       call this%add_hours(this%minute / 60)
@@ -391,12 +429,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: seconds
 
+    real(8) residue_seconds
+
     select type (seconds)
     type is (integer)
+      residue_seconds = 0
+      this%second = this%second + seconds
+    type is (real(4))
+      residue_seconds = seconds - int(seconds)
       this%second = this%second + seconds
     type is (real(8))
+      residue_seconds = seconds - int(seconds)
       this%second = this%second + seconds
     end select
+
+    if (residue_seconds /= 0) then
+      call this%add_milliseconds(residue_seconds * 1000)
+    end if
 
     if (this%second >= 60) then
       call this%add_minutes(this%second / 60)
@@ -416,20 +465,27 @@ contains
   pure subroutine add_milliseconds(this, milliseconds)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: milliseconds
+    class(*), intent(in) :: milliseconds
 
-    this%millisecond = this%millisecond + milliseconds
+    select type (milliseconds)
+    type is (integer)
+      this%millisecond = this%millisecond + milliseconds
+    type is (real(4))
+      this%millisecond = this%millisecond + milliseconds
+    type is (real(8))
+      this%millisecond = this%millisecond + milliseconds
+    end select
 
     if (this%millisecond >= 1000) then
-      call this%add_seconds(this%millisecond / 1000)
-      this%millisecond = mod(this%millisecond, 1000)
+      call this%add_seconds(int(this%millisecond / 1000))
+      this%millisecond = mod(this%millisecond, 1000.0)
     else if (this%millisecond < 0) then
-      if (mod(this%millisecond, 1000) == 0) then
-        call this%add_seconds(this%millisecond / 1000)
+      if (mod(this%millisecond, 1000.0) == 0) then
+        call this%add_seconds(int(this%millisecond / 1000))
         this%millisecond = 0
       else
-        call this%add_seconds(this%millisecond / 1000 - 1)
-        this%millisecond = mod(this%millisecond, 1000) + 1000
+        call this%add_seconds(int(this%millisecond / 1000) - 1)
+        this%millisecond = mod(this%millisecond, 1000.0d0) + 1000
       end if
     end if
 
@@ -467,7 +523,7 @@ contains
   elemental type(datetime_type) function add(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
-    class(timedelta_type), intent(in) :: td
+    type(timedelta_type), intent(in) :: td
 
     res = this
     call res%add_milliseconds(td%milliseconds)
@@ -481,7 +537,7 @@ contains
   pure elemental type(datetime_type) function sub_timedelta(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
-    class(timedelta_type), intent(in) :: td
+    type(timedelta_type), intent(in) :: td
 
     res = this
     call res%add_milliseconds(-td%milliseconds)
