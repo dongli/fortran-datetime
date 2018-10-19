@@ -26,6 +26,8 @@ program datetime_test
 
   a = create_datetime(timestamp=1532755828.266736d0)
 
+  call assert_approximate(a%timestamp(), 1532755828.266736d0, file_name=__FILE__, line_number=__LINE__)
+
   a = create_datetime('2018041401', '%Y%m%d%H')
   call assert_equal(a%isoformat(), '2018-04-14T01:00:00Z', file_name=__FILE__, line_number=__LINE__)
   call assert_equal(trim(a%format('%Y')), '2018', file_name=__FILE__, line_number=__LINE__)
@@ -209,12 +211,12 @@ program datetime_test
   call assert_equal(dt%hours, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
 
   a = create_datetime(2018, 1, 18, 13, 14, 12)
   b = create_datetime(2018, 1, 13, 12, 45, 13)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 59.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 28.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, 0.0d0, file_name=__FILE__, line_number=__LINE__)
@@ -223,7 +225,7 @@ program datetime_test
   a = create_datetime(2018, 1, 18, 0, 0, 0)
   b = create_datetime(2018, 1, 13, 0, 0, 0)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, 0.0d0, file_name=__FILE__, line_number=__LINE__)
@@ -232,7 +234,7 @@ program datetime_test
   a = create_datetime(2017, 2, 18, 13, 37, 20)
   b = create_datetime(2018, 1, 13, 0, 0, 0)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, -40.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, -22.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, -10.0d0, file_name=__FILE__, line_number=__LINE__)
@@ -241,7 +243,7 @@ program datetime_test
   a = create_datetime(2018, 4, 18, 13, 37, 20)
   b = create_datetime(2018, 4, 18, 13, 37, 10)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 10.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, 0.0d0, file_name=__FILE__, line_number=__LINE__)
@@ -250,7 +252,7 @@ program datetime_test
   a = create_datetime(2018, 4, 18, 13, 37, 0)
   b = create_datetime(2018, 4, 18, 13, 34, 0)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 3.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, 0.0d0, file_name=__FILE__, line_number=__LINE__)
@@ -259,7 +261,7 @@ program datetime_test
   a = create_datetime(2018, 4, 18, 13, 0, 0)
   b = create_datetime(2018, 4, 18, 12, 0, 0)
   dt = a - b
-  call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%milliseconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%seconds, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%minutes, 0.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%hours, 1.0d0, file_name=__FILE__, line_number=__LINE__)

@@ -25,6 +25,7 @@ module datetime_mod
   contains
     procedure :: init
     procedure :: isoformat
+    procedure :: timestamp
     procedure :: format
     procedure :: add_months
     procedure :: add_days
@@ -130,6 +131,7 @@ contains
       call res%add_minutes(int(residue_seconds / 60.0))
       residue_seconds = mod(residue_seconds, 60.0)
       call res%add_seconds(int(residue_seconds))
+      call res%add_milliseconds((residue_seconds - int(residue_seconds)) * 1000)
     else
       if (present(year))        res%year        = year
       if (present(month))       res%month       = month
@@ -239,6 +241,18 @@ contains
       this%year, this%month, this%day, this%hour, this%minute, this%second
 
   end function isoformat
+
+  function timestamp(this)
+
+    class(datetime_type), intent(in) :: this
+    real(8) timestamp
+
+    type(timedelta_type) dt
+
+    dt = this - create_datetime(1970)
+    timestamp = dt%total_seconds()
+
+  end function timestamp
 
   function format(this, format_str) result(res)
 
@@ -553,8 +567,8 @@ contains
     class(datetime_type), intent(in) :: this
     class(datetime_type), intent(in) :: other
 
-    integer year, month
-    integer days, hours, minutes, seconds, milliseconds
+    integer year, month, days, hours, minutes, seconds
+    real(8) milliseconds
 
     days = 0
     hours = 0

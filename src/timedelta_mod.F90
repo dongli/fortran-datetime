@@ -7,7 +7,7 @@ module timedelta_mod
     real(8) :: hours = 0.0d0
     real(8) :: minutes = 0.0d0
     real(8) :: seconds = 0.0d0
-    integer :: milliseconds = 0
+    real(8) :: milliseconds = 0.0d0
   contains
     procedure :: total_seconds
     procedure :: total_minutes
@@ -24,7 +24,7 @@ contains
     class(*), intent(in), optional :: hours
     class(*), intent(in), optional :: minutes
     class(*), intent(in), optional :: seconds
-    integer, intent(in), optional :: milliseconds
+    class(*), intent(in), optional :: milliseconds
 
     real(8) remainder
 
@@ -75,7 +75,14 @@ contains
     end if
 
     if (present(milliseconds)) then
-      res%milliseconds = milliseconds
+      select type (milliseconds)
+      type is (integer)
+        res%milliseconds = milliseconds
+      type is (real(4))
+        res%milliseconds = milliseconds
+      type is (real(8))
+        res%milliseconds = milliseconds
+      end select
     end if
 
   end function timedelta
