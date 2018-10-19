@@ -233,10 +233,10 @@ program datetime_test
   b = create_datetime(2018, 1, 13, 0, 0, 0)
   dt = a - b
   call assert_equal(dt%milliseconds, 0, file_name=__FILE__, line_number=__LINE__)
-  call assert_equal(dt%seconds, 40.0d0, file_name=__FILE__, line_number=__LINE__)
-  call assert_equal(dt%minutes, 22.0d0, file_name=__FILE__, line_number=__LINE__)
-  call assert_equal(dt%hours, 10.0d0, file_name=__FILE__, line_number=__LINE__)
-  call assert_equal(dt%days, 328.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%seconds, -40.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%minutes, -22.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%hours, -10.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%days, -328.0d0, file_name=__FILE__, line_number=__LINE__)
 
   a = create_datetime(2018, 4, 18, 13, 37, 20)
   b = create_datetime(2018, 4, 18, 13, 37, 10)
@@ -272,6 +272,13 @@ program datetime_test
   call assert_equal(dt%total_minutes(), 16624260.0d0 / 60.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%total_hours(), 16624260 / 3600.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt%total_days(), 16624260 / 86400.0d0, file_name=__FILE__, line_number=__LINE__)
+
+  a = create_datetime(year=2015, month=8, day=5, hour=21)
+  b = create_datetime(year=2015, month=8, day=5, hour=19, minute=31)
+  dt = b - a
+  call assert_equal(dt%days, 0.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%hours, -1.0d0, file_name=__FILE__, line_number=__LINE__)
+  call assert_equal(dt%minutes, -29.0d0, file_name=__FILE__, line_number=__LINE__)
 
   dt = timedelta(hours=0.5)
   a = create_datetime(2018, 9, 4, 14, 30)

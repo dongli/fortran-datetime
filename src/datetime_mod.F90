@@ -658,6 +658,7 @@ contains
       res = timedelta(days, hours, minutes, seconds, milliseconds)
     else
       res = sub_datetime(other, this)
+      res = res%negate()
     end if
 
   end function sub_datetime

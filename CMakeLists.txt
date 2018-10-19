@@ -22,7 +22,8 @@ set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
 if (RUN_TEST)
-  find_package (FortranUnitTest)
+  add_subdirectory ("lib/unit-test")
+  include_directories (${UNIT_TEST_INCLUDE_DIR})
 
   add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
   target_link_libraries (timedelta_test fortran_unit_test fortran_datetime)

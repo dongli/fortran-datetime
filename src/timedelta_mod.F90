@@ -13,6 +13,7 @@ module timedelta_mod
     procedure :: total_minutes
     procedure :: total_hours
     procedure :: total_days
+    procedure :: negate
   end type timedelta_type
 
 contains
@@ -110,5 +111,17 @@ contains
     total_days = this%days + (this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0) / 24.0d0
 
   end function total_days
+
+  pure elemental type(timedelta_type) function negate(this) result(res)
+
+    class(timedelta_type), intent(in) :: this
+
+    res%days = - this%days
+    res%hours = - this%hours
+    res%minutes = - this%minutes
+    res%seconds = - this%seconds
+    res%milliseconds = - this%milliseconds
+
+  end function negate
 
 end module timedelta_mod
