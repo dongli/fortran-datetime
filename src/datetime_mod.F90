@@ -258,11 +258,12 @@ contains
 
     class(datetime_type), intent(in) :: this
     character(*), intent(in) :: format_str
-    character(100) res
+    character(:), allocatable :: res
 
+    character(100) tmp
     integer i, j
 
-    res = ''
+    tmp = ''
     i = 1
     j = 1
     do while (i <= len_trim(format_str))
@@ -270,36 +271,37 @@ contains
         i = i + 1
         select case (format_str(i:i))
         case ('Y')
-          write(res(j:j+3), '(I4.4)') this%year
+          write(tmp(j:j+3), '(I4.4)') this%year
           j = j + 4
         case ('y')
-          write(res(j:j+1), '(I2.2)') mod(this%year, 100)
+          write(tmp(j:j+1), '(I2.2)') mod(this%year, 100)
           j = j + 2
         case ('j')
-          write(res(j:j+2), '(I3.3)') this%days_in_year()
+          write(tmp(j:j+2), '(I3.3)') this%days_in_year()
           j = j + 3
         case ('m')
-          write(res(j:j+1), '(I2.2)') this%month
+          write(tmp(j:j+1), '(I2.2)') this%month
           j = j + 2
         case ('d')
-          write(res(j:j+1), '(I2.2)') this%day
+          write(tmp(j:j+1), '(I2.2)') this%day
           j = j + 2
         case ('H')
-          write(res(j:j+1), '(I2.2)') this%hour
+          write(tmp(j:j+1), '(I2.2)') this%hour
           j = j + 2
         case ('M')
-          write(res(j:j+1), '(I2.2)') this%minute
+          write(tmp(j:j+1), '(I2.2)') this%minute
           j = j + 2
         case ('S')
-          write(res(j:j+1), '(I2.2)') this%second
+          write(tmp(j:j+1), '(I2.2)') this%second
           j = j + 2
         end select
         i = i + 1
       else
-        write(res(j:j), '(A1)') format_str(i:i)
+        write(tmp(j:j), '(A1)') format_str(i:i)
         j = j + 1
       end if
     end do
+    res = trim(tmp)
 
   end function format
 
