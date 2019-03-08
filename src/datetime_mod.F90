@@ -547,6 +547,7 @@ contains
     call res%add_minutes(td%minutes)
     call res%add_hours(td%hours)
     call res%add_days(td%days)
+    call res%add_months(td%months)
 
   end function add
 
@@ -671,7 +672,7 @@ contains
         hours = hours - 24
         days = days + 1
       end if
-      res = timedelta(days, hours, minutes, seconds, milliseconds)
+      res = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
     else
       res = sub_datetime(other, this)
       res = res%negate()

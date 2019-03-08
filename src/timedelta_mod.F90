@@ -3,6 +3,7 @@ module timedelta_mod
   implicit none
 
   type timedelta_type
+    integer :: months = 0.0d0
     real(8) :: days = 0.0d0
     real(8) :: hours = 0.0d0
     real(8) :: minutes = 0.0d0
@@ -18,8 +19,9 @@ module timedelta_mod
 
 contains
 
-  type(timedelta_type) function timedelta(days, hours, minutes, seconds, milliseconds) result(res)
+  type(timedelta_type) function timedelta(months, days, hours, minutes, seconds, milliseconds) result(res)
 
+    class(*), intent(in), optional :: months
     class(*), intent(in), optional :: days
     class(*), intent(in), optional :: hours
     class(*), intent(in), optional :: minutes
@@ -29,6 +31,17 @@ contains
     real(8) remainder
 
     remainder = 0.0d0
+
+    if (present(months)) then
+      select type (months)
+      type is (integer)
+        res%months = months
+      type is (real(4))
+        res%months = months
+      type is (real(8))
+        res%months = months
+      end select
+    end if
 
     if (present(days)) then
       select type (days)
@@ -91,7 +104,12 @@ contains
 
     class(timedelta_type), intent(in) :: this
 
-    total_seconds = this%days * 86400 + this%hours * 3600 + this%minutes * 60 + this%seconds + this%milliseconds * 1.0d-3
+    if (this%months == 0.0d0) then
+      total_seconds = this%days * 86400 + this%hours * 3600 + this%minutes * 60 + this%seconds + this%milliseconds * 1.0d-3
+    else
+      write(*, *) '[Error]: timedelta has nonzero months value!'
+      total_seconds = -1
+    end if
 
   end function total_seconds
 
@@ -99,7 +117,12 @@ contains
 
     class(timedelta_type), intent(in) :: this
 
-    total_minutes = this%days * 1440 + this%hours * 60 + this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0
+    if (this%months == 0.0d0) then
+      total_minutes = this%days * 1440 + this%hours * 60 + this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0
+    else
+      write(*, *) '[Error]: timedelta has nonzero months value!'
+      total_minutes = -1
+    end if
 
   end function total_minutes
 
@@ -107,7 +130,12 @@ contains
 
     class(timedelta_type), intent(in) :: this
 
-    total_hours = this%days * 24 + this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0
+    if (this%months == 0.0d0) then
+      total_hours = this%days * 24 + this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0
+    else
+      write(*, *) '[Error]: timedelta has nonzero months value!'
+      total_hours = -1
+    end if
 
   end function total_hours
 
@@ -115,7 +143,12 @@ contains
 
     class(timedelta_type), intent(in) :: this
 
-    total_days = this%days + (this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0) / 24.0d0
+    if (this%months == 0.0d0) then
+      total_days = this%days + (this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0) / 24.0d0
+    else
+      write(*, *) '[Error]: timedelta has nonzero months value!'
+      total_days = -1
+    end if
 
   end function total_days
 
