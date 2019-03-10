@@ -295,11 +295,11 @@ contains
           write(tmp(j:j+1), '(I2.2)') this%second
           j = j + 2
         end select
-        i = i + 1
       else
         write(tmp(j:j), '(A1)') format_str(i:i)
         j = j + 1
       end if
+      i = i + 1
     end do
     res = trim(tmp)
 
