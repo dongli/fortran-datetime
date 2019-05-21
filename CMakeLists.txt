@@ -38,8 +38,8 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
 )
 
 install (FILES
-  "${CMAKE_BINARY_DIR}/.mods/datetime_mod.mod"
-  "${CMAKE_BINARY_DIR}/.mods/timedelta_mod.mod"
+  "${CMAKE_BINARY_DIR}/datetime_mod.mod"
+  "${CMAKE_BINARY_DIR}/timedelta_mod.mod"
   DESTINATION include/fortran_datetime
 )
 
