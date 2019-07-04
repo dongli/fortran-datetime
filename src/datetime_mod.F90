@@ -12,8 +12,14 @@ module datetime_mod
   public days_of_month
   public days_of_year
   public is_leap_year
+  public datetime_gregorian_calendar
+  public datetime_noleap_calendar
+
+  integer, parameter :: datetime_gregorian_calendar = 1
+  integer, parameter :: datetime_noleap_calendar    = 2
 
   type datetime_type
+    integer :: calendar = datetime_gregorian_calendar
     integer :: year = 1
     integer :: month = 1
     integer :: day = 1
@@ -90,7 +96,7 @@ contains
       year,  month,  day,  hour,  minute, second, millisecond, &
                      days, hours, minutes, &
       timestamp, &
-      timezone) result(res)
+      timezone, calendar) result(res)
 
     integer, intent(in), optional :: year
     integer, intent(in), optional :: month
@@ -104,6 +110,7 @@ contains
     integer, intent(in), optional :: minutes
     class(*), intent(in), optional :: timestamp
     class(*), intent(in), optional :: timezone
+    integer, intent(in), optional :: calendar
 
     real(8) residue_seconds
 
@@ -155,12 +162,15 @@ contains
       end select
     end if
 
+    if (present(calendar)) res%calendar = calendar
+
   end function datetime_1
 
-  type(datetime_type) function datetime_2(datetime_str, format_str) result(res)
+  type(datetime_type) function datetime_2(datetime_str, format_str, calendar) result(res)
 
     character(*), intent(in) :: datetime_str
     character(*), intent(in), optional :: format_str
+    integer, intent(in), optional :: calendar
 
     integer i, j, num_spec
     character(1), allocatable :: specs(:) ! Date time element specifiers (e.g. 'Y', 'm', 'd')
@@ -229,6 +239,8 @@ contains
       read(datetime_str(15:16), '(I2)') res%minute
       read(datetime_str(18:19), '(I2)') res%second
     end if
+
+    if (present(calendar)) res%calendar = calendar
 
   end function datetime_2
 
@@ -526,6 +538,7 @@ contains
     class(datetime_type), intent(inout) :: this
     class(datetime_type), intent(in) :: other
 
+    this%calendar    = other%calendar
     this%year        = other%year
     this%month       = other%month
     this%day         = other%day
@@ -636,7 +649,11 @@ contains
         end if
       else
         do year = other%year + 1, this%year - 1
-          days = days + 365 + merge(1, 0, is_leap_year(year))
+          if (this%calendar == datetime_gregorian_calendar) then
+            days = days + 365 + merge(1, 0, is_leap_year(year))
+          else
+            days = days + 365
+          end if
         end do
         do month = other%month + 1, 12
           days = days + days_of_month(other%year, month)
