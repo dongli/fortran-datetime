@@ -41,7 +41,7 @@ module datetime_mod
     procedure :: add_milliseconds
     procedure :: days_in_year
     procedure, private :: assign
-    procedure, private :: add
+    procedure, private :: add_timedelta
     procedure, private :: sub_datetime
     procedure, private :: sub_timedelta
     procedure, private :: eq
@@ -51,7 +51,7 @@ module datetime_mod
     procedure, private :: lt
     procedure, private :: le
     generic :: assignment(=) => assign
-    generic :: operator(+) => add
+    generic :: operator(+) => add_timedelta
     generic :: operator(-) => sub_datetime
     generic :: operator(-) => sub_timedelta
     generic :: operator(==) => eq
@@ -184,7 +184,6 @@ contains
           num_spec = num_spec + 1
           i = i + 2
         else
-          num_spec = num_spec + 1
           i = i + 1
         end if
       end do
@@ -192,43 +191,36 @@ contains
       allocate(specs(num_spec))
 
       i = 1
-      j = 0
+      j = 1
       do while (i <= len_trim(format_str))
         if (format_str(i:i) == '%') then
           i = i + 1
-          j = j + 1
-          specs(j:j) = format_str(i:i)
+          select case (format_str(i:i))
+          case ('Y')
+            read(datetime_str(j:j+3), '(I4)') res%year
+            j = j + 4
+          case ('m')
+            read(datetime_str(j:j+1), '(I2)') res%month
+            j = j + 2
+          case ('d')
+            read(datetime_str(j:j+1), '(I2)') res%day
+            j = j + 2
+          case ('H')
+            read(datetime_str(j:j+1), '(I2)') res%hour
+            j = j + 2
+          case ('M')
+            read(datetime_str(j:j+1), '(I2)') res%minute
+            j = j + 2
+          case ('S')
+            read(datetime_str(j:j+1), '(I2)') res%second
+            j = j + 2
+          case default
+            j = j + 1
+          end select
         else
           j = j + 1
-          specs(j:j) = format_str(i:i)
         end if
         i = i + 1
-      end do
-
-      i = 1
-      do j = 1, num_spec
-        select case (specs(j))
-        case ('Y')
-          read(datetime_str(i:i+3), '(I4)') res%year
-          i = i + 4
-        case ('m')
-          read(datetime_str(i:i+1), '(I2)') res%month
-          i = i + 2
-        case ('d')
-          read(datetime_str(i:i+1), '(I2)') res%day
-          i = i + 2
-        case ('H')
-          read(datetime_str(i:i+1), '(I2)') res%hour
-          i = i + 2
-        case ('M')
-          read(datetime_str(i:i+1), '(I2)') res%minute
-          i = i + 2
-        case ('S')
-          read(datetime_str(i:i+1), '(I2)') res%second
-          i = i + 2
-        case default
-          i = i + 1
-        end select
       end do
     else
       ! TODO: I assume UTC time for the time being.
@@ -549,7 +541,7 @@ contains
 
   end subroutine assign
 
-  elemental type(datetime_type) function add(this, td) result(res)
+  elemental type(datetime_type) function add_timedelta(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
     type(timedelta_type), intent(in) :: td
@@ -562,7 +554,7 @@ contains
     call res%add_days(td%days)
     call res%add_months(td%months)
 
-  end function add
+  end function add_timedelta
 
   pure elemental type(datetime_type) function sub_timedelta(this, td) result(res)
 
