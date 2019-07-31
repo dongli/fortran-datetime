@@ -353,10 +353,10 @@ contains
     do
       if (this%day < 1) then
         call this%add_months(-1)
-        month_days = days_of_month(this%year, this%month)
+        month_days = days_of_month(this%year, this%month, this%calendar)
         this%day = this%day + month_days
       else
-        month_days = days_of_month(this%year, this%month)
+        month_days = days_of_month(this%year, this%month, this%calendar)
         if (this%day > month_days) then
           call this%add_months(1)
           this%day = this%day - month_days
@@ -519,7 +519,7 @@ contains
 
     res = 0
     do month = 1, this%month - 1
-      res = res + days_of_month(this%year, month)
+      res = res + days_of_month(this%year, month, this%calendar)
     end do
     res = res + this%day
 
@@ -626,9 +626,9 @@ contains
           end if
         else
           do month = other%month + 1, this%month - 1
-            days = days + days_of_month(this%year, month)
+            days = days + days_of_month(this%year, month, this%calendar)
           end do
-          days = days + days_of_month(other%year, other%month) - other%day - 1
+          days = days + days_of_month(other%year, other%month, other%calendar) - other%day - 1
           days = days + this%day
           hours = hours + 24 - other%hour - 1
           hours = hours + this%hour
@@ -648,12 +648,12 @@ contains
           end if
         end do
         do month = other%month + 1, 12
-          days = days + days_of_month(other%year, month)
+          days = days + days_of_month(other%year, month, other%calendar)
         end do
         do month = 1, this%month - 1
-          days = days + days_of_month(this%year, month)
+          days = days + days_of_month(this%year, month, this%calendar)
         end do
-        days = days + days_of_month(other%year, other%month) - other%day - 1
+        days = days + days_of_month(other%year, other%month, other%calendar) - other%day - 1
         days = days + this%day
         hours = hours + 24 - other%hour - 1
         hours = hours + this%hour
@@ -805,14 +805,15 @@ contains
 
   end function le
 
-  pure integer function days_of_month(year, month) result(res)
+  pure integer function days_of_month(year, month, calendar) result(res)
 
     integer, intent(in) :: year
     integer, intent(in) :: month
+    integer, intent(in) :: calendar
 
     integer, parameter :: days(12) = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    if (month == 2 .and. is_leap_year(year)) then
+    if (month == 2 .and. is_leap_year(year) .and. calendar == datetime_gregorian_calendar) then
       res = 29
     else
       res = days(month)
