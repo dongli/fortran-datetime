@@ -298,6 +298,8 @@ contains
         case ('S')
           write(tmp(j:j+1), '(I2.2)') this%second
           j = j + 2
+        case ('s')
+          write(tmp(j:j+4), '(I5.5)') this%hour * 3600 + this%minute * 60 + this%second
         end select
       else
         write(tmp(j:j), '(A1)') format_str(i:i)
