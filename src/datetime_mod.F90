@@ -6,24 +6,32 @@ module datetime_mod
 
   private
 
+  public create_datetime
   public set_datetime
   public datetime_type
   public days_of_month
   public days_of_year
   public is_leap_year
+  public datetime_gregorian_calendar
+  public datetime_noleap_calendar
+
+  integer, parameter :: datetime_gregorian_calendar = 1
+  integer, parameter :: datetime_noleap_calendar    = 2
 
   type datetime_type
+    integer :: calendar = datetime_gregorian_calendar
     integer :: year = 1
     integer :: month = 1
     integer :: day = 1
     integer :: hour = 0
     integer :: minute = 0
     integer :: second = 0
-    integer :: millisecond = 0
+    real(8) :: millisecond = 0
     real(8) :: timezone = 0.0d0
   contains
     procedure :: init
     procedure :: isoformat
+    procedure :: timestamp
     procedure :: format
     procedure :: add_months
     procedure :: add_days
@@ -33,7 +41,7 @@ module datetime_mod
     procedure :: add_milliseconds
     procedure :: days_in_year
     procedure, private :: assign
-    procedure, private :: add
+    procedure, private :: add_timedelta
     procedure, private :: sub_datetime
     procedure, private :: sub_timedelta
     procedure, private :: eq
@@ -43,7 +51,7 @@ module datetime_mod
     procedure, private :: lt
     procedure, private :: le
     generic :: assignment(=) => assign
-    generic :: operator(+) => add
+    generic :: operator(+) => add_timedelta
     generic :: operator(-) => sub_datetime
     generic :: operator(-) => sub_timedelta
     generic :: operator(==) => eq
@@ -53,6 +61,11 @@ module datetime_mod
     generic :: operator(<) => lt
     generic :: operator(<=) => le
   end type datetime_type
+
+  interface create_datetime
+    module procedure datetime_1
+    module procedure datetime_2
+  end interface create_datetime
 
   interface set_datetime
     module procedure datetime_1
@@ -83,7 +96,7 @@ contains
       year,  month,  day,  hour,  minute, second, millisecond, &
                      days, hours, minutes, &
       timestamp, &
-      timezone) result(res)
+      timezone, calendar) result(res)
 
     integer, intent(in), optional :: year
     integer, intent(in), optional :: month
@@ -97,6 +110,7 @@ contains
     integer, intent(in), optional :: minutes
     class(*), intent(in), optional :: timestamp
     class(*), intent(in), optional :: timezone
+    integer, intent(in), optional :: calendar
 
     real(8) residue_seconds
 
@@ -124,6 +138,7 @@ contains
       call res%add_minutes(int(residue_seconds / 60.0))
       residue_seconds = mod(residue_seconds, 60.0)
       call res%add_seconds(int(residue_seconds))
+      call res%add_milliseconds((residue_seconds - int(residue_seconds)) * 1000)
     else
       if (present(year))        res%year        = year
       if (present(month))       res%month       = month
@@ -147,12 +162,15 @@ contains
       end select
     end if
 
+    if (present(calendar)) res%calendar = calendar
+
   end function datetime_1
 
-  type(datetime_type) function datetime_2(datetime_str, format_str) result(res)
+  type(datetime_type) function datetime_2(datetime_str, format_str, calendar) result(res)
 
     character(*), intent(in) :: datetime_str
     character(*), intent(in), optional :: format_str
+    integer, intent(in), optional :: calendar
 
     integer i, j, num_spec
     character(1), allocatable :: specs(:) ! Date time element specifiers (e.g. 'Y', 'm', 'd')
@@ -166,7 +184,6 @@ contains
           num_spec = num_spec + 1
           i = i + 2
         else
-          num_spec = num_spec + 1
           i = i + 1
         end if
       end do
@@ -174,43 +191,36 @@ contains
       allocate(specs(num_spec))
 
       i = 1
-      j = 0
+      j = 1
       do while (i <= len_trim(format_str))
         if (format_str(i:i) == '%') then
           i = i + 1
-          j = j + 1
-          specs(j:j) = format_str(i:i)
+          select case (format_str(i:i))
+          case ('Y')
+            read(datetime_str(j:j+3), '(I4)') res%year
+            j = j + 4
+          case ('m')
+            read(datetime_str(j:j+1), '(I2)') res%month
+            j = j + 2
+          case ('d')
+            read(datetime_str(j:j+1), '(I2)') res%day
+            j = j + 2
+          case ('H')
+            read(datetime_str(j:j+1), '(I2)') res%hour
+            j = j + 2
+          case ('M')
+            read(datetime_str(j:j+1), '(I2)') res%minute
+            j = j + 2
+          case ('S')
+            read(datetime_str(j:j+1), '(I2)') res%second
+            j = j + 2
+          case default
+            j = j + 1
+          end select
         else
           j = j + 1
-          specs(j:j) = format_str(i:i)
         end if
         i = i + 1
-      end do
-
-      i = 1
-      do j = 1, num_spec
-        select case (specs(j))
-        case ('Y')
-          read(datetime_str(i:i+3), '(I4)') res%year
-          i = i + 4
-        case ('m')
-          read(datetime_str(i:i+1), '(I2)') res%month
-          i = i + 2
-        case ('d')
-          read(datetime_str(i:i+1), '(I2)') res%day
-          i = i + 2
-        case ('H')
-          read(datetime_str(i:i+1), '(I2)') res%hour
-          i = i + 2
-        case ('M')
-          read(datetime_str(i:i+1), '(I2)') res%minute
-          i = i + 2
-        case ('S')
-          read(datetime_str(i:i+1), '(I2)') res%second
-          i = i + 2
-        case default
-          i = i + 1
-        end select
       end do
     else
       ! TODO: I assume UTC time for the time being.
@@ -221,6 +231,8 @@ contains
       read(datetime_str(15:16), '(I2)') res%minute
       read(datetime_str(18:19), '(I2)') res%second
     end if
+
+    if (present(calendar)) res%calendar = calendar
 
   end function datetime_2
 
@@ -234,15 +246,28 @@ contains
 
   end function isoformat
 
+  function timestamp(this)
+
+    class(datetime_type), intent(in) :: this
+    real(8) timestamp
+
+    type(timedelta_type) dt
+
+    dt = this - create_datetime(1970)
+    timestamp = dt%total_seconds()
+
+  end function timestamp
+
   function format(this, format_str) result(res)
 
     class(datetime_type), intent(in) :: this
     character(*), intent(in) :: format_str
-    character(100) res
+    character(:), allocatable :: res
 
+    character(100) tmp
     integer i, j
 
-    res = ''
+    tmp = ''
     i = 1
     j = 1
     do while (i <= len_trim(format_str))
@@ -250,36 +275,39 @@ contains
         i = i + 1
         select case (format_str(i:i))
         case ('Y')
-          write(res(j:j+3), '(I4.4)') this%year
+          write(tmp(j:j+3), '(I4.4)') this%year
           j = j + 4
         case ('y')
-          write(res(j:j+1), '(I2.2)') mod(this%year, 100)
+          write(tmp(j:j+1), '(I2.2)') mod(this%year, 100)
           j = j + 2
         case ('j')
-          write(res(j:j+2), '(I3.3)') this%days_in_year()
+          write(tmp(j:j+2), '(I3.3)') this%days_in_year()
           j = j + 3
         case ('m')
-          write(res(j:j+1), '(I2.2)') this%month
+          write(tmp(j:j+1), '(I2.2)') this%month
           j = j + 2
         case ('d')
-          write(res(j:j+1), '(I2.2)') this%day
+          write(tmp(j:j+1), '(I2.2)') this%day
           j = j + 2
         case ('H')
-          write(res(j:j+1), '(I2.2)') this%hour
+          write(tmp(j:j+1), '(I2.2)') this%hour
           j = j + 2
         case ('M')
-          write(res(j:j+1), '(I2.2)') this%minute
+          write(tmp(j:j+1), '(I2.2)') this%minute
           j = j + 2
         case ('S')
-          write(res(j:j+1), '(I2.2)') this%second
+          write(tmp(j:j+1), '(I2.2)') this%second
           j = j + 2
+        case ('s')
+          write(tmp(j:j+4), '(I5.5)') this%hour * 3600 + this%minute * 60 + this%second
         end select
-        i = i + 1
       else
-        write(res(j:j), '(A1)') format_str(i:i)
+        write(tmp(j:j), '(A1)') format_str(i:i)
         j = j + 1
       end if
+      i = i + 1
     end do
+    res = trim(tmp)
 
   end function format
 
@@ -305,22 +333,32 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: days
 
+    real(8) residue_days
     integer month_days
 
     select type (days)
     type is (integer)
+      residue_days = 0
+      this%day = this%day + days
+    type is (real(4))
+      residue_days = days - int(days)
       this%day = this%day + days
     type is (real(8))
+      residue_days = days - int(days)
       this%day = this%day + days
     end select
+
+    if (residue_days /= 0) then
+      call this%add_hours(residue_days * 24)
+    end if
 
     do
       if (this%day < 1) then
         call this%add_months(-1)
-        month_days = days_of_month(this%year, this%month)
+        month_days = days_of_month(this%year, this%month, this%calendar)
         this%day = this%day + month_days
       else
-        month_days = days_of_month(this%year, this%month)
+        month_days = days_of_month(this%year, this%month, this%calendar)
         if (this%day > month_days) then
           call this%add_months(1)
           this%day = this%day - month_days
@@ -337,12 +375,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: hours
 
+    real(8) residue_hours
+
     select type (hours)
     type is (integer)
+      residue_hours = 0
+      this%hour = this%hour + hours
+    type is (real(4))
+      residue_hours = hours - int(hours)
       this%hour = this%hour + hours
     type is (real(8))
+      residue_hours = hours - int(hours)
       this%hour = this%hour + hours
     end select
+
+    if (residue_hours /= 0) then
+      call this%add_minutes(residue_hours * 60)
+    end if
 
     if (this%hour >= 24) then
       call this%add_days(this%hour / 24)
@@ -364,12 +413,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: minutes
 
+    real(8) residue_minutes
+
     select type (minutes)
     type is (integer)
+      residue_minutes = 0
+      this%minute = this%minute + minutes
+    type is (real(4))
+      residue_minutes = minutes - int(minutes)
       this%minute = this%minute + minutes
     type is (real(8))
+      residue_minutes = minutes - int(minutes)
       this%minute = this%minute + minutes
     end select
+
+    if (residue_minutes /= 0) then
+      call this%add_seconds(residue_minutes * 60)
+    end if
 
     if (this%minute >= 60) then
       call this%add_hours(this%minute / 60)
@@ -391,12 +451,23 @@ contains
     class(datetime_type), intent(inout) :: this
     class(*), intent(in) :: seconds
 
+    real(8) residue_seconds
+
     select type (seconds)
     type is (integer)
+      residue_seconds = 0
+      this%second = this%second + seconds
+    type is (real(4))
+      residue_seconds = seconds - int(seconds)
       this%second = this%second + seconds
     type is (real(8))
+      residue_seconds = seconds - int(seconds)
       this%second = this%second + seconds
     end select
+
+    if (residue_seconds /= 0) then
+      call this%add_milliseconds(residue_seconds * 1000)
+    end if
 
     if (this%second >= 60) then
       call this%add_minutes(this%second / 60)
@@ -416,20 +487,27 @@ contains
   pure subroutine add_milliseconds(this, milliseconds)
 
     class(datetime_type), intent(inout) :: this
-    integer, intent(in) :: milliseconds
+    class(*), intent(in) :: milliseconds
 
-    this%millisecond = this%millisecond + milliseconds
+    select type (milliseconds)
+    type is (integer)
+      this%millisecond = this%millisecond + milliseconds
+    type is (real(4))
+      this%millisecond = this%millisecond + milliseconds
+    type is (real(8))
+      this%millisecond = this%millisecond + milliseconds
+    end select
 
     if (this%millisecond >= 1000) then
-      call this%add_seconds(this%millisecond / 1000)
-      this%millisecond = mod(this%millisecond, 1000)
+      call this%add_seconds(int(this%millisecond / 1000))
+      this%millisecond = mod(this%millisecond, 1000.0)
     else if (this%millisecond < 0) then
-      if (mod(this%millisecond, 1000) == 0) then
-        call this%add_seconds(this%millisecond / 1000)
+      if (mod(this%millisecond, 1000.0) == 0) then
+        call this%add_seconds(int(this%millisecond / 1000))
         this%millisecond = 0
       else
-        call this%add_seconds(this%millisecond / 1000 - 1)
-        this%millisecond = mod(this%millisecond, 1000) + 1000
+        call this%add_seconds(int(this%millisecond / 1000) - 1)
+        this%millisecond = mod(this%millisecond, 1000.0d0) + 1000
       end if
     end if
 
@@ -443,7 +521,7 @@ contains
 
     res = 0
     do month = 1, this%month - 1
-      res = res + days_of_month(this%year, month)
+      res = res + days_of_month(this%year, month, this%calendar)
     end do
     res = res + this%day
 
@@ -454,6 +532,7 @@ contains
     class(datetime_type), intent(inout) :: this
     class(datetime_type), intent(in) :: other
 
+    this%calendar    = other%calendar
     this%year        = other%year
     this%month       = other%month
     this%day         = other%day
@@ -464,10 +543,10 @@ contains
 
   end subroutine assign
 
-  elemental type(datetime_type) function add(this, td) result(res)
+  elemental type(datetime_type) function add_timedelta(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
-    class(timedelta_type), intent(in) :: td
+    type(timedelta_type), intent(in) :: td
 
     res = this
     call res%add_milliseconds(td%milliseconds)
@@ -475,13 +554,14 @@ contains
     call res%add_minutes(td%minutes)
     call res%add_hours(td%hours)
     call res%add_days(td%days)
+    call res%add_months(td%months)
 
-  end function add
+  end function add_timedelta
 
   pure elemental type(datetime_type) function sub_timedelta(this, td) result(res)
 
     class(datetime_type), intent(in) :: this
-    class(timedelta_type), intent(in) :: td
+    type(timedelta_type), intent(in) :: td
 
     res = this
     call res%add_milliseconds(-td%milliseconds)
@@ -497,8 +577,8 @@ contains
     class(datetime_type), intent(in) :: this
     class(datetime_type), intent(in) :: other
 
-    integer year, month
-    integer days, hours, minutes, seconds, milliseconds
+    integer year, month, days, hours, minutes, seconds
+    real(8) milliseconds
 
     days = 0
     hours = 0
@@ -548,9 +628,9 @@ contains
           end if
         else
           do month = other%month + 1, this%month - 1
-            days = days + days_of_month(this%year, month)
+            days = days + days_of_month(this%year, month, this%calendar)
           end do
-          days = days + days_of_month(other%year, other%month) - other%day - 1
+          days = days + days_of_month(other%year, other%month, other%calendar) - other%day - 1
           days = days + this%day
           hours = hours + 24 - other%hour - 1
           hours = hours + this%hour
@@ -563,15 +643,19 @@ contains
         end if
       else
         do year = other%year + 1, this%year - 1
-          days = days + 365 + merge(1, 0, is_leap_year(year))
+          if (this%calendar == datetime_gregorian_calendar) then
+            days = days + 365 + merge(1, 0, is_leap_year(year))
+          else
+            days = days + 365
+          end if
         end do
         do month = other%month + 1, 12
-          days = days + days_of_month(other%year, month)
+          days = days + days_of_month(other%year, month, other%calendar)
         end do
         do month = 1, this%month - 1
-          days = days + days_of_month(this%year, month)
+          days = days + days_of_month(this%year, month, this%calendar)
         end do
-        days = days + days_of_month(other%year, other%month) - other%day - 1
+        days = days + days_of_month(other%year, other%month, other%calendar) - other%day - 1
         days = days + this%day
         hours = hours + 24 - other%hour - 1
         hours = hours + this%hour
@@ -599,9 +683,10 @@ contains
         hours = hours - 24
         days = days + 1
       end if
-      res = timedelta(days, hours, minutes, seconds, milliseconds)
+      res = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
     else
       res = sub_datetime(other, this)
+      res = res%negate()
     end if
 
   end function sub_datetime
@@ -722,14 +807,15 @@ contains
 
   end function le
 
-  pure integer function days_of_month(year, month) result(res)
+  pure integer function days_of_month(year, month, calendar) result(res)
 
     integer, intent(in) :: year
     integer, intent(in) :: month
+    integer, intent(in) :: calendar
 
     integer, parameter :: days(12) = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    if (month == 2 .and. is_leap_year(year)) then
+    if (month == 2 .and. is_leap_year(year) .and. calendar == datetime_gregorian_calendar) then
       res = 29
     else
       res = days(month)

@@ -9,11 +9,12 @@ set (version 0.0.2)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
 endif ()
-set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/.mods")
+set (CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 set (sources
-  "${PROJECT_SOURCE_DIR}/src/timedelta_mod.F90"
-  "${PROJECT_SOURCE_DIR}/src/datetime_mod.F90"
+  src/timedelta_mod.F90
+  src/datetime_mod.F90
+  src/datetime.F90
 )
 
 add_library (fortran_datetime SHARED ${sources})
@@ -21,7 +22,8 @@ set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
 if (RUN_TEST)
-  find_package (FortranUnitTest)
+  add_subdirectory ("lib/unit-test")
+  include_directories (${UNIT_TEST_INCLUDE_DIR})
 
   add_executable (timedelta_test "${PROJECT_SOURCE_DIR}/src/timedelta_test.F90")
   target_link_libraries (timedelta_test fortran_unit_test fortran_datetime)
@@ -36,8 +38,8 @@ install (TARGETS fortran_datetime EXPORT FortranDatetimeTargets
 )
 
 install (FILES
-  "${CMAKE_BINARY_DIR}/.mods/datetime_mod.mod"
-  "${CMAKE_BINARY_DIR}/.mods/timedelta_mod.mod"
+  "${CMAKE_BINARY_DIR}/datetime_mod.mod"
+  "${CMAKE_BINARY_DIR}/timedelta_mod.mod"
   DESTINATION include/fortran_datetime
 )
 
