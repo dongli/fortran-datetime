@@ -8,7 +8,7 @@ program datetime_test
   type(datetime_type) a, b
   type(timedelta_type) dt
 
-  call test_case_init()
+  call test_suite_init('Test datetime')
 
   call test_case_create('Test datetime type')
 
@@ -275,6 +275,6 @@ program datetime_test
 
   call test_case_report('Test datetime type')
 
-  call test_case_final()
+  call test_suite_final()
 
 end program datetime_test
