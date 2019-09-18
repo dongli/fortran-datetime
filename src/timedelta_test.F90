@@ -7,7 +7,7 @@ program timedelta_test
 
   type(timedelta_type) dt1, dt2
 
-  call test_case_init()
+  call test_suite_init('Test timedelta')
 
   call test_case_create('Test timedelta type')
 
@@ -63,6 +63,6 @@ program timedelta_test
 
   call test_case_report('Test timedelta type')
 
-  call test_case_final()
+  call test_suite_final()
 
 end program timedelta_test
