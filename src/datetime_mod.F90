@@ -166,10 +166,11 @@ contains
 
   end function datetime_1
 
-  type(datetime_type) function datetime_2(datetime_str, format_str, calendar) result(res)
+  type(datetime_type) function datetime_2(datetime_str, format_str, timezone, calendar) result(res)
 
     character(*), intent(in) :: datetime_str
     character(*), intent(in), optional :: format_str
+    class(*), intent(in), optional :: timezone
     integer, intent(in), optional :: calendar
 
     integer i, j, num_spec
@@ -232,6 +233,20 @@ contains
       read(datetime_str(18:19), '(I2)') res%second
     end if
 
+    if (present(timezone)) then
+      select type (timezone)
+      type is (integer)
+        res%timezone = timezone
+      type is (real(4))
+        res%timezone = timezone
+      type is (real(8))
+        res%timezone = timezone
+      class default
+        write(*, *) '[Error]: datetime: Invalid timezone argument type! Only integer and real are supported.'
+        stop 1
+      end select
+    end if
+
     if (present(calendar)) res%calendar = calendar
 
   end function datetime_2
@@ -241,20 +256,36 @@ contains
     class(datetime_type), intent(in) :: this
     character(30) res
 
-    write(res, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, 'Z')") &
-      this%year, this%month, this%day, this%hour, this%minute, this%second
+    if (this%timezone == 0) then
+      write(res, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, 'Z')") &
+        this%year, this%month, this%day, this%hour, this%minute, this%second
+    else
+      write(res, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, SP, I3.2, ':00')") &
+        this%year, this%month, this%day, this%hour, this%minute, this%second, int(this%timezone)
+    end if
 
   end function isoformat
 
-  function timestamp(this)
+  function timestamp(this, timezone)
 
     class(datetime_type), intent(in) :: this
+    class(*), intent(in), optional :: timezone
     real(8) timestamp
 
     type(timedelta_type) dt
 
     dt = this - create_datetime(1970)
     timestamp = dt%total_seconds()
+    if (present(timezone)) then
+      select type (timezone)
+      type is (integer)
+        timestamp = timestamp - (this%timezone - timezone) * 3600
+      type is (real(4))
+        timestamp = timestamp - (this%timezone - timezone) * 3600
+      type is (real(8))
+        timestamp = timestamp - (this%timezone - timezone) * 3600
+      end select
+    end if
 
   end function timestamp
 
@@ -540,6 +571,7 @@ contains
     this%minute      = other%minute
     this%second      = other%second
     this%millisecond = other%millisecond
+    this%timezone    = other%timezone
 
   end subroutine assign
 
