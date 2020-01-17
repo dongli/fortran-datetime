@@ -94,7 +94,7 @@ contains
 
   type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute, second, millisecond, &
-                     days, hours, minutes, &
+             julday, days, hours, minutes, &
       timestamp, &
       timezone, calendar) result(res)
 
@@ -105,6 +105,7 @@ contains
     integer, intent(in), optional :: minute
     integer, intent(in), optional :: second
     integer, intent(in), optional :: millisecond
+    integer, intent(in), optional :: julday
     integer, intent(in), optional :: days
     integer, intent(in), optional :: hours
     integer, intent(in), optional :: minutes
@@ -113,6 +114,9 @@ contains
     integer, intent(in), optional :: calendar
 
     real(8) residue_seconds
+    integer mon
+
+    if (present(calendar)) res%calendar = calendar
 
     if (present(timestamp)) then
       ! Assume the start date time is UTC 1970-01-01 00:00:00.
@@ -141,8 +145,21 @@ contains
       call res%add_milliseconds((residue_seconds - int(residue_seconds)) * 1000)
     else
       if (present(year))        res%year        = year
-      if (present(month))       res%month       = month
-      if (present(day))         res%day         = day
+      if (present(julday)) then
+        res%day = 0
+        do mon = 1, 12
+          res%day = res%day + days_of_month(year, mon, res%calendar)
+          if (res%day > julday) then
+            res%day = res%day - days_of_month(year, mon, res%calendar)
+            res%day = julday - res%day
+            exit
+          end if
+        end do
+        res%month = mon
+      else
+        if (present(month))       res%month       = month
+        if (present(day))         res%day         = day
+      end if
       if (present(hour))        res%hour        = hour
       if (present(minute))      res%minute      = minute
       if (present(second))      res%second      = second
@@ -161,8 +178,6 @@ contains
         res%timezone = timezone
       end select
     end if
-
-    if (present(calendar)) res%calendar = calendar
 
   end function datetime_1
 
