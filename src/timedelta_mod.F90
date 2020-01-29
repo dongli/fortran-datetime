@@ -2,6 +2,11 @@ module timedelta_mod
 
   implicit none
 
+  private
+
+  public timedelta_type
+  public create_timedelta
+
   type timedelta_type
     integer :: months = 0.0d0
     real(8) :: days = 0.0d0
@@ -19,7 +24,7 @@ module timedelta_mod
 
 contains
 
-  type(timedelta_type) function timedelta(months, days, hours, minutes, seconds, milliseconds) result(res)
+  type(timedelta_type) function create_timedelta(months, days, hours, minutes, seconds, milliseconds) result(res)
 
     class(*), intent(in), optional :: months
     class(*), intent(in), optional :: days
@@ -98,7 +103,7 @@ contains
       end select
     end if
 
-  end function timedelta
+  end function create_timedelta
 
   real(8) function total_seconds(this)
 

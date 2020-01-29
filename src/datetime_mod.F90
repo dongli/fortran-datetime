@@ -10,6 +10,7 @@ module datetime_mod
   public set_datetime
   public datetime_type
   public days_of_month
+  public accum_days
   public days_of_year
   public is_leap_year
   public datetime_gregorian_calendar
@@ -144,29 +145,38 @@ contains
       call res%add_seconds(int(residue_seconds))
       call res%add_milliseconds((residue_seconds - int(residue_seconds)) * 1000)
     else
-      if (present(year))        res%year        = year
+      if (present(year)) res%year = year
       if (present(julday)) then
         res%day = 0
         do mon = 1, 12
           res%day = res%day + days_of_month(year, mon, res%calendar)
-          if (res%day > julday) then
-            res%day = res%day - days_of_month(year, mon, res%calendar)
-            res%day = julday - res%day
-            exit
-          end if
+          if (res%day > julday) exit
         end do
-        res%month = mon
+        res%month = min(mon, 12)
+        res%day = julday - accum_days(year, res%month, 0, res%calendar)
       else
-        if (present(month))       res%month       = month
-        if (present(day))         res%day         = day
+        if (present(month)) res%month = month
+        if (present(day  )) res%day   = day
       end if
-      if (present(hour))        res%hour        = hour
-      if (present(minute))      res%minute      = minute
-      if (present(second))      res%second      = second
+      if (present(hour       )) res%hour        = hour
+      if (present(minute     )) res%minute      = minute
+      if (present(second     )) res%second      = second
       if (present(millisecond)) res%millisecond = millisecond
-      if (present(days))        call res%add_days(days)
-      if (present(hours))       call res%add_hours(hours)
-      if (present(minutes))     call res%add_minutes(minutes)
+      if (present(days       )) call res%add_days(days)
+      if (present(hours      )) call res%add_hours(hours)
+      if (present(minutes    )) call res%add_minutes(minutes)
+      if (res%second == 60) then
+        call res%add_minutes(1)
+        res%second = 0
+      end if
+      if (res%minute == 60) then
+        call res%add_hours(1)
+        res%minute = 0
+      end if
+      if (res%hour == 24) then
+        call res%add_days(1)
+        res%hour = 0
+      end if
     end if
     if (present(timezone)) then
       select type (timezone)
@@ -730,7 +740,7 @@ contains
         hours = hours - 24
         days = days + 1
       end if
-      res = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
+      res = create_timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
     else
       res = sub_datetime(other, this)
       res = res%negate()
@@ -870,15 +880,37 @@ contains
 
   end function days_of_month
 
-  pure integer function days_of_year(year) result(res)
+  pure integer function accum_days(year, month, day, calendar) result(res)
 
     integer, intent(in) :: year
+    integer, intent(in) :: month
+    integer, intent(in) :: day
+    integer, intent(in) :: calendar
 
-    if (is_leap_year(year)) then
-      res = 366
-    else
+    integer mon
+
+    res = day
+    do mon = 1, month - 1
+      res = res + days_of_month(year, mon, calendar)
+    end do
+
+  end function accum_days
+
+  pure integer function days_of_year(year, calendar) result(res)
+
+    integer, intent(in) :: year
+    integer, intent(in) :: calendar
+
+    select case (calendar)
+    case (datetime_gregorian_calendar)
+      if (is_leap_year(year)) then
+        res = 366
+      else
+        res = 365
+      end if
+    case (datetime_noleap_calendar)
       res = 365
-    end if
+    end select
 
   end function days_of_year
 

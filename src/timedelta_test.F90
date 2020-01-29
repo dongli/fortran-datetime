@@ -11,45 +11,45 @@ program timedelta_test
 
   call test_case_create('Test timedelta type')
 
-  dt1 = timedelta(days=2)
+  dt1 = create_timedelta(days=2)
 
   call assert_equal(dt1%total_seconds(), 2.0d0 * 86400.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_minutes(), 2.0d0 * 1440.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_hours(), 2.0d0 * 24.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_days(), 2.0d0, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(hours=3, minutes=30)
+  dt1 = create_timedelta(hours=3, minutes=30)
 
   call assert_equal(dt1%total_seconds(), 3.5 * 3600.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_minutes(), 3.5 * 60.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_hours(), 3.5d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_days(), 3.5 / 24.0d0, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(minutes=6)
+  dt1 = create_timedelta(minutes=6)
 
   call assert_equal(dt1%total_seconds(), 360.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_minutes(), 6.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_hours(), 6.0d0 / 60.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_days(), 6.0d0 / 1440.0d0, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(seconds=60, milliseconds=103)
+  dt1 = create_timedelta(seconds=60, milliseconds=103)
 
   call assert_equal(dt1%total_seconds(), 60.103d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_minutes(), 60.103d0 / 60.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_hours(), 60.103d0 / 3600.0d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_days(), 60.103d0 / 86400.0d0, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(seconds=33.1d0)
+  dt1 = create_timedelta(seconds=33.1d0)
 
   call assert_approximate(dt1%seconds, 33.1d0, eps=1.0d-10, file_name=__FILE__, line_number=__LINE__)
   call assert_approximate(dt1%total_seconds(), 33.1d0, eps=1.0d-10, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(minutes=3.24d0)
+  dt1 = create_timedelta(minutes=3.24d0)
 
   call assert_equal(dt1%minutes, 3.24d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%total_seconds(), 194.4d0, file_name=__FILE__, line_number=__LINE__)
 
-  dt1 = timedelta(hours=1.43d0, seconds=13d0)
+  dt1 = create_timedelta(hours=1.43d0, seconds=13d0)
 
   call assert_equal(dt1%hours, 1.43d0, file_name=__FILE__, line_number=__LINE__)
   call assert_equal(dt1%seconds, 13.0d0, file_name=__FILE__, line_number=__LINE__)
