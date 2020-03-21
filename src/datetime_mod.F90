@@ -94,8 +94,8 @@ contains
   end subroutine init
 
   type(datetime_type) function datetime_1( &
-      year,  month,  day,  hour,  minute, second, millisecond, &
-             julday, days, hours, minutes, &
+      year,  month,  day,  hour,  minute,  second, millisecond, &
+             julday, days, hours, minutes, seconds, &
       timestamp, &
       timezone, calendar) result(res)
 
@@ -110,6 +110,7 @@ contains
     integer, intent(in), optional :: days
     integer, intent(in), optional :: hours
     integer, intent(in), optional :: minutes
+    integer, intent(in), optional :: seconds
     class(*), intent(in), optional :: timestamp
     class(*), intent(in), optional :: timezone
     integer, intent(in), optional :: calendar
@@ -165,6 +166,7 @@ contains
       if (present(days       )) call res%add_days(days)
       if (present(hours      )) call res%add_hours(hours)
       if (present(minutes    )) call res%add_minutes(minutes)
+      if (present(seconds    )) call res%add_seconds(seconds)
       if (res%second == 60) then
         call res%add_minutes(1)
         res%second = 0
@@ -279,15 +281,19 @@ contains
   function isoformat(this) result(res)
 
     class(datetime_type), intent(in) :: this
-    character(30) res
+    character(:), allocatable :: res
+
+    character(30) tmp
 
     if (this%timezone == 0) then
-      write(res, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, 'Z')") &
+      write(tmp, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, 'Z')") &
         this%year, this%month, this%day, this%hour, this%minute, this%second
     else
-      write(res, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, SP, I3.2, ':00')") &
+      write(tmp, "(I4.4, '-', I2.2, '-', I2.2, 'T', I2.2, ':', I2.2, ':', I2.2, SP, I3.2, ':00')") &
         this%year, this%month, this%day, this%hour, this%minute, this%second, int(this%timezone)
     end if
+
+    res = trim(tmp)
 
   end function isoformat
 
