@@ -24,7 +24,7 @@ module timedelta_mod
 
 contains
 
-  type(timedelta_type) function create_timedelta(months, days, hours, minutes, seconds, milliseconds) result(res)
+  pure type(timedelta_type) function create_timedelta(months, days, hours, minutes, seconds, milliseconds) result(res)
 
     class(*), intent(in), optional :: months
     class(*), intent(in), optional :: days

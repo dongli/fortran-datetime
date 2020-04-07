@@ -93,7 +93,7 @@ contains
   
   end subroutine init
 
-  type(datetime_type) function datetime_1( &
+  pure type(datetime_type) function datetime_1( &
       year,  month,  day,  hour,  minute,  second, millisecond, &
              julday, days, hours, minutes, seconds, &
       timestamp, &
