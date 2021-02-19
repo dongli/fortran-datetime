@@ -17,7 +17,7 @@ set (sources
   src/datetime.F90
 )
 
-add_library (fortran_datetime SHARED ${sources})
+add_library (fortran_datetime STATIC ${sources})
 set_property (TARGET fortran_datetime PROPERTY VERSION ${version})
 set_property (TARGET fortran_datetime PROPERTY SOVERSION 1)
 
