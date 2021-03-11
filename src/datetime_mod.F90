@@ -632,6 +632,7 @@ contains
     call res%add_minutes(-td%minutes)
     call res%add_hours(-td%hours)
     call res%add_days(-td%days)
+    call res%add_months(-td%months)
 
   end function sub_timedelta
 
