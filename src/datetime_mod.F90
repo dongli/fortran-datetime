@@ -200,7 +200,7 @@ contains
     class(*), intent(in), optional :: timezone
     integer, intent(in), optional :: calendar
 
-    integer i, j, num_spec
+    integer i, j, ierr, num_spec
     character(1), allocatable :: specs(:) ! Date time element specifiers (e.g. 'Y', 'm', 'd')
 
     if (present(format_str)) then
@@ -252,12 +252,36 @@ contains
       end do
     else
       ! TODO: I assume UTC time for the time being.
-      read(datetime_str(1:4), '(I4)') res%year
-      read(datetime_str(6:7), '(I2)') res%month
-      read(datetime_str(9:10), '(I2)') res%day
-      read(datetime_str(12:13), '(I2)') res%hour
-      read(datetime_str(15:16), '(I2)') res%minute
-      read(datetime_str(18:19), '(I2)') res%second
+      read(datetime_str(1:4), '(I4)', iostat=ierr) res%year
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
+      read(datetime_str(6:7), '(I2)', iostat=ierr) res%month
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
+      read(datetime_str(9:10), '(I2)', iostat=ierr) res%day
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
+      read(datetime_str(12:13), '(I2)', iostat=ierr) res%hour
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
+      read(datetime_str(15:16), '(I2)', iostat=ierr) res%minute
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
+      read(datetime_str(18:19), '(I2)', iostat=ierr) res%second
+      if (ierr /= 0) then
+        write(*, *) '[Error]: datetime: Invalid argument ' // trim(datetime_str) // '!'
+        stop 1
+      end if
     end if
 
     if (present(timezone)) then
