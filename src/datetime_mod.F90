@@ -242,6 +242,10 @@ contains
           case ('S')
             read(datetime_str(j:j+1), '(I2)') res%second
             j = j + 2
+          case ('Z')
+            ! +08:00
+            read(datetime_str(j:j+2), '(I3)') res%timezone
+            j = j + 6
           case default
             j = j + 1
           end select
